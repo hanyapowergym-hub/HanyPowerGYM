@@ -2,8 +2,8 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hany Power GYM - تطبيق العميل</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hany Power GYM</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root {
@@ -15,80 +15,148 @@
             --border-color: #262626;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: var(--bg-black); color: #fff; min-height: 100vh; overflow-x: hidden; padding-bottom: 75px; }
+        html, body {
+            width: 100vw; min-height: 100vh; background: var(--bg-black); color: #fff;
+            overflow-x: hidden; display: flex; flex-direction: column; justify-content: space-between;
+        }
 
-        /* 1. Splash Screen */
+        /* الشريط العلوي */
+        .app-topbar {
+            width: 100%; background: #000; border-bottom: 2px solid var(--neon-green);
+            padding: 12px 20px; display: none; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 900; box-shadow: 0 2px 15px rgba(0,0,0,0.8);
+        }
+        .app-topbar .logo-title { color: var(--neon-green); font-weight: 900; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
+        .app-topbar .logo-title img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 1px solid var(--neon-green); }
+        
+        .wa-header-btn {
+            background: #25D366; color: #fff; border: none; border-radius: 50px;
+            padding: 8px 14px; display: flex; align-items: center; gap: 6px;
+            font-weight: bold; font-size: 0.85rem; cursor: pointer;
+            box-shadow: 0 0 12px rgba(37, 211, 102, 0.6);
+        }
+        .wa-header-btn svg { width: 20px; height: 20px; fill: #fff; }
+
+        /* شاشة البداية (5 ثواني) */
         #splash-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #000; z-index: 10000; display: flex; flex-direction: column;
-            justify-content: space-between; align-items: center; padding: 30px 20px;
+            justify-content: space-between; align-items: center; padding: 20px 20px 10px 20px;
         }
         .splash-img-box { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; }
-        .splash-img-box img { width: 100%; max-width: 360px; max-height: 70vh; object-fit: contain; filter: drop-shadow(0 0 20px rgba(27,225,27,0.4)); }
-        .loading-area { width: 100%; max-width: 380px; text-align: center; margin-bottom: 20px; }
-        .progress-container { width: 100%; height: 14px; background: #1a1a1a; border-radius: 10px; border: 1px solid #333; overflow: hidden; margin: 10px 0; }
+        .splash-img-box img { width: 100%; max-width: 390px; max-height: 62vh; object-fit: contain; filter: drop-shadow(0 0 25px rgba(27,225,27,0.5)); }
+        .loading-area { width: 100%; max-width: 500px; text-align: center; margin-bottom: 10px; }
+        .progress-container { width: 100%; height: 16px; background: #1a1a1a; border-radius: 10px; border: 1px solid #333; overflow: hidden; margin: 10px 0; }
         .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #0a8a0a, var(--neon-green), #7dff7d); box-shadow: var(--neon-glow); transition: width 0.1s linear; }
-        .progress-text { color: var(--neon-green); font-weight: bold; font-size: 1rem; text-shadow: var(--neon-glow); }
-        #welcome-area { margin-top: 12px; min-height: 45px; }
-        .welcome-msg { font-size: 1.3rem; font-weight: bold; color: #fff; }
+        .progress-text { color: var(--neon-green); font-weight: bold; font-size: 1.1rem; text-shadow: var(--neon-glow); }
+        #welcome-area { margin-top: 10px; min-height: 45px; }
+        .welcome-msg { font-size: 1.4rem; font-weight: bold; color: #fff; }
         .welcome-msg span { color: var(--neon-green); }
 
-        /* Buttons & Inputs */
+        /* الأزرار والمدخلات */
         .btn-green {
             background: linear-gradient(135deg, #109c10, var(--neon-green)); color: #000; font-weight: 800;
-            border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 1rem;
+            border: none; padding: 14px 24px; border-radius: 10px; cursor: pointer; font-size: 1.05rem;
             box-shadow: var(--neon-glow); transition: 0.3s; width: 100%; text-align: center;
         }
-        .btn-green:hover { transform: scale(1.02); }
-        .btn-outline { background: transparent; border: 2px solid var(--neon-green); color: var(--neon-green); font-weight: bold; padding: 10px; border-radius: 10px; cursor: pointer; width: 100%; margin-top: 10px; }
+        .btn-outline { background: transparent; border: 2px solid var(--neon-green); color: var(--neon-green); font-weight: bold; padding: 12px; border-radius: 10px; cursor: pointer; width: 100%; margin-top: 10px; font-size: 1rem; }
         input, select, textarea {
-            width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px;
-            border: 1px solid var(--border-color); background: #0a0a0a; color: #fff; font-size: 0.95rem; outline: none;
+            width: 100%; padding: 14px; margin-bottom: 12px; border-radius: 10px;
+            border: 1px solid var(--border-color); background: #0a0a0a; color: #fff; font-size: 1rem; outline: none;
         }
         input:focus, select:focus, textarea:focus { border-color: var(--neon-green); box-shadow: 0 0 8px rgba(27,225,27,0.3); }
 
-        /* Screens & Modals */
-        .screen { display: none; max-width: 480px; margin: 0 auto; padding: 20px; }
+        /* الشاشات */
+        .screen { display: none; width: 100vw; flex: 1; padding: 20px; }
         .screen.active { display: block; }
-        .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 15px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.6); }
+        .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 15px; padding: 20px; margin-bottom: 15px; width: 100%; box-shadow: 0 4px 20px rgba(0,0,0,0.6); }
         .title-green { color: var(--neon-green); text-align: center; margin-bottom: 15px; font-size: 1.4rem; }
         .link-green { color: var(--neon-green); text-align: center; display: block; margin-top: 15px; cursor: pointer; font-weight: bold; text-decoration: underline; }
 
-        /* Main Client Dashboard */
-        .client-header { text-align: center; padding: 15px; border-bottom: 2px solid var(--neon-green); margin-bottom: 15px; background: var(--card-bg); border-radius: 15px; }
-        .client-header h2 { font-size: 1.6rem; color: #fff; margin-bottom: 5px; }
-        .client-header .pkg-badge { color: var(--neon-green); font-weight: bold; font-size: 1.05rem; margin-bottom: 6px; }
-        .client-header .dates { color: var(--silver); font-size: 0.85rem; }
+        /* التقاط الصورة الشخصية */
+        .photo-picker-box {
+            text-align: center; margin: 15px 0; padding: 15px; background: #0a0a0a;
+            border: 1px dashed var(--neon-green); border-radius: 12px;
+        }
+        .photo-preview {
+            width: 110px; height: 110px; border-radius: 50%; object-fit: cover;
+            border: 2px solid var(--neon-green); margin: 0 auto 12px auto; display: none;
+            box-shadow: var(--neon-glow);
+        }
+        .photo-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-        .middle-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px; align-items: stretch; margin-bottom: 15px; }
-        .qr-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 15px; padding: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        #qrcode { background: #fff; padding: 10px; border-radius: 10px; margin-bottom: 8px; }
-        .stats-side { display: flex; flex-direction: column; gap: 12px; }
-        .stat-box { flex: 1; background: var(--card-bg); border: 1px solid var(--neon-green); border-radius: 15px; padding: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        .stat-box .big-num { font-size: 2.2rem; font-weight: 900; color: var(--neon-green); text-shadow: var(--neon-glow); line-height: 1; }
-        .stat-box .label { font-size: 0.8rem; color: var(--silver); margin-top: 5px; }
+        /* الشاشة الرئيسية للعميل */
+        .client-header { text-align: center; padding: 18px; border-bottom: 2px solid var(--neon-green); margin-bottom: 15px; background: var(--card-bg); border-radius: 15px; width: 100%; }
+        .client-avatar { width: 75px; height: 75px; border-radius: 50%; object-fit: cover; border: 2px solid var(--neon-green); margin-bottom: 8px; display: none; margin-left: auto; margin-right: auto; }
+        .client-header h2 { font-size: 1.7rem; color: #fff; margin-bottom: 6px; }
+        .client-header .pkg-badge { color: var(--neon-green); font-weight: bold; font-size: 1.15rem; margin-bottom: 6px; }
+        .client-header .dates { color: var(--silver); font-size: 0.9rem; }
+        .next-pkg-badge { background: #092209; border: 1px solid var(--neon-green); color: #86efac; padding: 8px; border-radius: 8px; margin-top: 10px; font-size: 0.85rem; display: none; }
+
+        .qr-center-card {
+            background: var(--card-bg); border: 2px solid var(--neon-green); border-radius: 18px;
+            padding: 25px 15px; display: flex; flex-direction: column; align-items: center;
+            justify-content: center; margin-bottom: 15px; width: 100%; box-shadow: var(--neon-glow);
+        }
+        #qrcode { background: #fff; padding: 14px; border-radius: 12px; display: flex; justify-content: center; align-items: center; }
+
+        .two-cards-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; margin-bottom: 15px; }
+        .stat-box {
+            background: var(--card-bg); border: 1px solid var(--neon-green); border-radius: 15px;
+            padding: 18px 12px; display: flex; flex-direction: column; justify-content: center;
+            align-items: center; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .stat-box .big-num { font-size: 2.6rem; font-weight: 900; color: var(--neon-green); text-shadow: var(--neon-glow); line-height: 1; }
+        .stat-box .label { font-size: 0.9rem; color: var(--silver); margin-top: 8px; font-weight: bold; }
 
         .wide-tab {
             background: linear-gradient(90deg, #111, #1a2e1a, #111); border: 2px solid var(--neon-green);
-            color: var(--neon-green); padding: 15px; border-radius: 12px; text-align: center;
-            font-size: 1.2rem; font-weight: bold; cursor: pointer; margin-bottom: 15px; box-shadow: var(--neon-glow);
+            color: var(--neon-green); padding: 16px; border-radius: 12px; text-align: center;
+            font-size: 1.25rem; font-weight: bold; cursor: pointer; margin-bottom: 15px; box-shadow: var(--neon-glow); width: 100%;
         }
 
-        /* Offers & Messages */
-        .offer-item { background: #181818; border-right: 4px solid var(--neon-green); padding: 12px; border-radius: 8px; margin-bottom: 10px; cursor: pointer; }
-        .offer-details { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid #333; color: var(--silver); font-size: 0.9rem; }
+        .offer-item { background: #181818; border-right: 4px solid var(--neon-green); padding: 14px; border-radius: 8px; margin-bottom: 10px; cursor: pointer; }
+        .offer-details { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid #333; color: var(--silver); font-size: 0.95rem; line-height: 1.6; }
 
-        /* Bottom Nav */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #0a0a0a; border-top: 1px solid var(--border-color); display: none; z-index: 999; }
-        .nav-btn { flex: 1; padding: 14px 0; text-align: center; color: var(--silver); cursor: pointer; font-weight: bold; font-size: 0.9rem; }
+        /* شريط التابات السفلي */
+        .bottom-nav { position: sticky; bottom: 0; left: 0; width: 100vw; background: #0a0a0a; border-top: 1px solid var(--border-color); display: none; z-index: 999; }
+        .nav-btn { flex: 1; padding: 15px 0; text-align: center; color: var(--silver); cursor: pointer; font-weight: bold; font-size: 0.95rem; }
         .nav-btn.active { color: var(--neon-green); border-top: 3px solid var(--neon-green); background: #111; }
 
-        /* Modals */
-        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); display:none; justify-content:center; align-items:center; z-index:9999; padding:20px; }
-        .modal-box { background: var(--card-bg); border: 2px solid var(--neon-green); border-radius: 15px; padding: 20px; width: 100%; max-width: 440px; max-height: 85vh; overflow-y: auto; }
+        /* فوتر حقوق شركة Link الثابت في جميع الصفحات */
+        .link-global-footer {
+            width: 100%; background: #080b10; border-top: 1px solid #262c36;
+            padding: 10px 15px; display: flex; align-items: center; justify-content: center;
+            gap: 12px; direction: rtl; text-align: center; flex-wrap: wrap;
+        }
+        .link-global-footer img {
+            height: 38px; width: auto; border-radius: 6px; object-fit: contain;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        .link-global-footer .footer-txt {
+            color: #d1d5db; font-size: 0.85rem; font-weight: bold; line-height: 1.4;
+        }
+        .link-global-footer .footer-txt span {
+            color: var(--neon-green); font-weight: 900; letter-spacing: 0.5px;
+        }
+
+        .modal-overlay { position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(0,0,0,0.88); display:none; justify-content:center; align-items:center; z-index:9999; padding:20px; }
+        .modal-box { background: var(--card-bg); border: 2px solid var(--neon-green); border-radius: 15px; padding: 22px; width: 100%; max-width: 500px; max-height: 85vh; overflow-y: auto; }
     </style>
 </head>
 <body>
+
+    <!-- الشريط العلوي مع زر واتساب للإدارة -->
+    <div class="app-topbar" id="app-topbar">
+        <div class="logo-title">
+            <img src="HanyLogo.jpg" alt="Logo" onerror="this.style.display='none'">
+            <span>HANY POWER GYM</span>
+        </div>
+        <button class="wa-header-btn" onclick="contactAdminWhatsApp()">
+            <svg viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824zm-3.423-14.416c-6.627 0-12 5.373-12 12 0 2.625.846 5.059 2.284 7.033l-1.492 5.448 5.601-1.469c1.907 1.132 4.132 1.788 6.516 1.788 6.627 0 12-5.373 12-12s-5.373-12-11.909-12z"/></svg>
+            <span>واتساب الإدارة</span>
+        </button>
+    </div>
 
     <!-- 1. شاشة البداية (5 ثواني) -->
     <div id="splash-screen">
@@ -100,8 +168,13 @@
             <div class="progress-container">
                 <div class="progress-bar" id="progress-bar"></div>
             </div>
-            <div id="status-check" style="color:var(--silver); font-size:0.8rem;">جاري الاتصال بقاعدة البيانات وفحص الإنترنت...</div>
+            <div id="status-check" style="color:var(--silver); font-size:0.85rem;">جاري الاتصال...</div>
             <div id="welcome-area"></div>
+        </div>
+        <!-- فوتر حقوق الملكية في شاشة البداية أيضاً -->
+        <div class="link-global-footer">
+            <img src="Link.png" alt="Link Logo" onerror="this.style.display='none'">
+            <div class="footer-txt">جميع الحقوق محفوظة شركة <span>Link</span> للبرمجة والتطوير - <span>Muhamed Elhamalawy</span></div>
         </div>
     </div>
 
@@ -110,10 +183,10 @@
         <div class="card">
             <h2 class="title-green">تسجيل الدخول</h2>
             <input type="tel" id="login-phone" placeholder="رقم الموبايل">
-            <input type="password" id="login-pass" placeholder="كلمة المرور أو كود التفعيل">
+            <input type="password" id="login-pass" placeholder="كلمة المرور">
             <button class="btn-green" onclick="loginClient()">دخول</button>
             <span class="link-green" onclick="showScreen('register-screen')">تسجيل عميل جديد</span>
-            <span class="link-green" style="font-size:0.85rem; color:#9ca3af;" onclick="showScreen('activate-screen')">لديك كود تفعيل؟ اضغط هنا</span>
+            <span class="link-green" style="font-size:0.9rem; color:#9ca3af;" onclick="openActivationScreen()">تفعيل حساب جديد بكود التفعيل</span>
         </div>
     </div>
 
@@ -122,7 +195,7 @@
         <div class="card">
             <h2 class="title-green">تسجيل عميل جديد</h2>
             <input type="text" id="reg-name" placeholder="الاسم بالكامل">
-            <input type="tel" id="reg-phone" placeholder="رقم التليفون (عليه واتساب)">
+            <input type="tel" id="reg-phone" placeholder="رقم التليفون (واتساب)">
             <input type="email" id="reg-email" placeholder="البريد الإلكتروني (اختياري)">
             <input type="text" id="reg-address" placeholder="العنوان">
             <div style="display:flex; gap:10px;">
@@ -132,107 +205,137 @@
                 </select>
                 <input type="number" id="reg-age" placeholder="السن">
             </div>
-            <label style="color:var(--silver); font-size:0.85rem; display:block; margin-bottom:5px;">اختر الباقة / العرض المتاح:</label>
+            <label style="color:var(--silver); font-size:0.9rem; display:block; margin-bottom:6px;">اختر الباقة:</label>
             <select id="reg-package"></select>
             
-            <button class="btn-green" style="margin-bottom:10px;" onclick="sendRegistrationRequest('whatsapp')">📲 إرسال الطلب عبر واتساب</button>
-            <button class="btn-outline" onclick="sendRegistrationRequest('email')">📧 إرسال الطلب عبر الإيميل</button>
-            <span class="link-green" onclick="showScreen('login-screen')">العودة لتسجيل الدخول</span>
+            <button class="btn-green" style="margin-bottom:10px;" onclick="sendRegistrationRequest('whatsapp')">إرسال عبر واتساب</button>
+            <button class="btn-outline" onclick="sendRegistrationRequest('email')">إرسال عبر الإيميل</button>
+            <span class="link-green" onclick="showScreen('login-screen')">رجوع</span>
         </div>
     </div>
 
-    <!-- 4. شاشة الانتظار وتفعيل الحساب -->
+    <!-- 4. شاشة التفعيل (الخطوة 1: كود التفعيل فقط -> الخطوة 2: كلمة السر والصورة الشخصية) -->
     <div id="activate-screen" class="screen">
         <div class="card">
             <h2 class="title-green">تفعيل الحساب</h2>
             <p id="work-hours-note" style="color:var(--silver); font-size:0.9rem; text-align:center; margin-bottom:15px;"></p>
-            <input type="tel" id="act-phone" placeholder="رقم هاتفك المسجل">
-            <input type="text" id="act-code" placeholder="الصق رسالة أو كود التفعيل هنا">
-            <input type="password" id="act-pass1" placeholder="كلمة المرور الجديدة">
-            <input type="password" id="act-pass2" placeholder="تأكيد كلمة المرور الجديدة">
-            <button class="btn-green" onclick="activateAccount()">تفعيل وحفظ كلمة المرور</button>
+
+            <!-- الخطوة الأولى: إدخال الكود فقط -->
+            <div id="act-step-1">
+                <input type="tel" id="act-phone" placeholder="رقم الموبايل المسجل">
+                <input type="text" id="act-code" placeholder="كود التفعيل">
+                <button class="btn-green" onclick="verifyActivationCodeStep()">تحقق من الكود</button>
+            </div>
+
+            <!-- الخطوة الثانية: تظهر فقط بعد التحقق من صحة الكود لأول مرة -->
+            <div id="act-step-2" style="display:none;">
+                <input type="password" id="act-pass1" placeholder="كلمة المرور الجديدة">
+                <input type="password" id="act-pass2" placeholder="تأكيد كلمة المرور الجديدة">
+                
+                <div class="photo-picker-box">
+                    <p style="color:var(--neon-green); font-weight:bold; margin-bottom:10px;">الصورة الشخصية للكارنيه</p>
+                    <img id="client-photo-preview" class="photo-preview" alt="Preview">
+                    <input type="file" id="camera-input" accept="image/*" capture="user" style="display:none;" onchange="handleImageSelect(event)">
+                    <input type="file" id="gallery-input" accept="image/*" style="display:none;" onchange="handleImageSelect(event)">
+                    <div class="photo-btns">
+                        <button type="button" class="btn-outline" style="margin:0;" onclick="document.getElementById('camera-input').click()">📷 الكاميرا</button>
+                        <button type="button" class="btn-outline" style="margin:0;" onclick="document.getElementById('gallery-input').click()">🖼️ الاستوديو</button>
+                    </div>
+                </div>
+
+                <button class="btn-green" onclick="completeFirstSetup()">حفظ ودخول</button>
+            </div>
+
             <span class="link-green" onclick="showScreen('login-screen')">رجوع</span>
         </div>
     </div>
 
     <!-- 5. الشاشة الرئيسية للعميل -->
     <div id="main-screen" class="screen">
-        <!-- تاب 1: البروفايل والـ QR -->
         <div id="client-tab-home">
             <div class="client-header">
+                <img id="ui-client-photo" class="client-avatar" alt="صورة العميل">
                 <h2 id="ui-client-name">--</h2>
                 <div class="pkg-badge" id="ui-client-pkg">--</div>
                 <div class="dates" id="ui-client-dates">بداية: -- | نهاية: --</div>
-                <div id="ui-client-debt" style="color:#ef4444; font-weight:bold; font-size:0.9rem; margin-top:5px; display:none;"></div>
+                <div id="ui-next-pkg" class="next-pkg-badge"></div>
+                <div id="ui-client-debt" style="color:#ef4444; font-weight:bold; font-size:0.95rem; margin-top:6px; display:none;"></div>
             </div>
 
-            <div class="middle-grid">
-                <div class="qr-card">
-                    <div id="qrcode"></div>
-                    <span style="font-size:0.75rem; color:var(--silver);">امسح الكود بالريسيبشن للدخول</span>
-                    <span id="gps-badge" style="font-size:0.75rem; color:var(--neon-green); margin-top:5px;"></span>
+            <!-- QR Code في منتصف الشاشة -->
+            <div class="qr-center-card">
+                <div id="qrcode"></div>
+            </div>
+
+            <!-- الكارتين تحت الـ QR جنب بعض -->
+            <div class="two-cards-row">
+                <div class="stat-box">
+                    <div class="big-num" id="ui-att-count">0</div>
+                    <div class="label">عدد مرات الحضور</div>
                 </div>
-                <div class="stats-side">
-                    <div class="stat-box">
-                        <div class="big-num" id="ui-att-count">0</div>
-                        <div class="label">عدد مرات الحضور</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="big-num" id="ui-inv-count">0</div>
-                        <div class="label">الدعوات المتاحة (Invitations)</div>
-                    </div>
+                <div class="stat-box">
+                    <div class="big-num" id="ui-inv-count">0</div>
+                    <div class="label">الدعوات المتاحة</div>
                 </div>
             </div>
 
-            <div class="wide-tab" onclick="switchClientTab('offers')">🔥 العروض الحالية السارية</div>
+            <!-- تاب العروض الحالية -->
+            <div class="wide-tab" onclick="switchClientTab('offers')">العروض الحالية</div>
+            
             <button class="btn-outline" onclick="logoutClient()" style="border-color:#ef4444; color:#ef4444;">تسجيل خروج</button>
         </div>
 
-        <!-- تاب 2: صفحة العروض السارية -->
+        <!-- صفحة العروض السارية -->
         <div id="client-tab-offers" style="display:none;">
             <div class="card">
-                <h3 class="title-green">العروض والباقات السارية</h3>
+                <h3 class="title-green">العروض الحالية</h3>
                 <div id="offers-list-container"></div>
-                <button class="btn-outline" onclick="switchClientTab('home')">العودة للرئيسية</button>
+                <button class="btn-outline" onclick="switchClientTab('home')">رجوع</button>
             </div>
         </div>
 
-        <!-- تاب 3: نظام الميل المصغر للشكاوى والتواصل -->
+        <!-- تاب الشكاوى -->
         <div id="client-tab-complaints" style="display:none;">
             <div class="card">
-                <h3 class="title-green">📩 صندوق الشكاوى والمراسلات</h3>
-                <textarea id="complaint-text" rows="3" placeholder="اكتب شكواك أو استفسارك لإدارة الجيم..."></textarea>
-                <button class="btn-green" onclick="sendComplaint()">إرسال الشكوى للإدارة</button>
+                <h3 class="title-green">الشكاوى والمراسلات</h3>
+                <textarea id="complaint-text" rows="3" placeholder="اكتب رسالتك هنا..."></textarea>
+                <button class="btn-green" onclick="sendComplaint()">إرسال</button>
             </div>
             <div class="card">
-                <h4 style="color:var(--neon-green); margin-bottom:10px;">سجل المراسلات والردود:</h4>
+                <h4 style="color:var(--neon-green); margin-bottom:10px;">السجل:</h4>
                 <div id="client-complaints-history"></div>
             </div>
         </div>
     </div>
 
-    <!-- شريط التنقل السفلي للعميل -->
+    <!-- الفوتر العام الثابت في أسفل كل صفحات التطبيق -->
+    <footer class="link-global-footer">
+        <img src="Link.png" alt="Link Logo" onerror="this.style.display='none'">
+        <div class="footer-txt">جميع الحقوق محفوظة شركة <span>Link</span> للبرمجة والتطوير - <span>Muhamed Elhamalawy</span></div>
+    </footer>
+
+    <!-- شريط التنقل السفلي -->
     <div class="bottom-nav" id="client-bottom-nav">
-        <div class="nav-btn active" onclick="switchClientTab('home', this)">🏠 الرئيسية والـ QR</div>
-        <div class="nav-btn" onclick="switchClientTab('offers', this)">🔥 العروض</div>
-        <div class="nav-btn" onclick="switchClientTab('complaints', this)">📩 الشكاوى والبريد</div>
+        <div class="nav-btn active" id="nav-btn-home" onclick="switchClientTab('home', this)">الرئيسية</div>
+        <div class="nav-btn" id="nav-btn-offers" onclick="switchClientTab('offers', this)">العروض</div>
+        <div class="nav-btn" id="nav-btn-complaints" onclick="switchClientTab('complaints', this)">الشكاوى</div>
     </div>
 
     <!-- نافذة الشروط والأحكام -->
     <div class="modal-overlay" id="terms-modal">
         <div class="modal-box">
-            <h3 class="title-green">الشروط والأحكام - Hany Power GYM</h3>
-            <div id="terms-content" style="color:var(--silver); font-size:0.9rem; line-height:1.6; margin-bottom:15px; white-space:pre-line;"></div>
-            <button class="btn-green" onclick="acceptTerms()">أوافق على الشروط والأحكام</button>
+            <h3 class="title-green">الشروط والأحكام</h3>
+            <div id="terms-content" style="color:var(--silver); font-size:0.95rem; line-height:1.6; margin-bottom:15px; white-space:pre-line;"></div>
+            <button class="btn-green" onclick="acceptTerms()">أوافق</button>
         </div>
     </div>
 
-    <!-- نافذة الرسالة الترويجية (تظهر مرة واحدة) -->
+    <!-- نافذة الرسائل الترويجية -->
     <div class="modal-overlay" id="promo-modal">
         <div class="modal-box" style="text-align:center;">
-            <h3 class="title-green">🎉 إشعار وعرض خاص لك!</h3>
-            <p id="promo-content" style="color:#fff; font-size:1.05rem; margin:15px 0; line-height:1.6;"></p>
-            <button class="btn-green" onclick="closePromoModal()">حسناً، فهمت</button>
+            <h3 class="title-green">إشعار</h3>
+            <p id="promo-content" style="color:#fff; font-size:1.1rem; margin:15px 0; line-height:1.6;"></p>
+            <button class="btn-green" onclick="closePromoModal()">إغلاق</button>
         </div>
     </div>
 
@@ -258,8 +361,30 @@
         let activePackages = {};
         let currentClientId = localStorage.getItem("hpg_client_id");
         let currentClientData = null;
+        let verifiedTargetClientId = null;
+        let selectedPhotoBase64 = "";
 
-        // جلب البيانات أثناء شاشة البداية (5 ثواني)
+        function formatEgyptPhone(rawPhone) {
+            let digits = String(rawPhone || "").replace(/\D/g, '');
+            if (digits.startsWith("0020")) digits = digits.slice(2);
+            else if (digits.startsWith("0")) digits = "20" + digits.slice(1);
+            else if (!digits.startsWith("20") && digits.length === 10) digits = "20" + digits;
+            return digits;
+        }
+
+        function openDirectWhatsApp(phone, textMsg) {
+            const egPhone = formatEgyptPhone(phone);
+            window.location.href = `whatsapp://send?phone=${egPhone}&text=${encodeURIComponent(textMsg)}`;
+        }
+
+        // إرسال رسالة واتساب للإدارة تتضمن اسم العميل ورقم تليفونه تلقائياً
+        window.contactAdminWhatsApp = function() {
+            const cName = currentClientData?.name || document.getElementById("reg-name")?.value.trim() || "عميل";
+            const cPhone = currentClientData?.phone || document.getElementById("login-phone")?.value.trim() || document.getElementById("reg-phone")?.value.trim() || "غير محدد";
+            const msg = `مرحباً إدارة Hany Power GYM\nالاسم: ${cName}\nرقم التليفون: ${cPhone}\nاستفساري هو: `;
+            openDirectWhatsApp(gymSettings.whatsapp, msg);
+        };
+
         onValue(ref(db, 'gym_settings'), (snap) => {
             if (snap.exists()) gymSettings = { ...gymSettings, ...snap.val() };
         });
@@ -269,7 +394,7 @@
             renderPackagesDropdownAndOffers();
         });
 
-        // تشغيل عداد الـ 5 ثواني من 0% إلى 100%
+        // شاشة البداية 5 ثواني
         let progress = 0;
         const bar = document.getElementById("progress-bar");
         const txt = document.getElementById("progress-text");
@@ -282,28 +407,28 @@
             txt.textContent = progress + "%";
 
             if (progress === 60) {
-                document.getElementById("status-check").textContent = navigator.onLine ? "✅ متصل بالإنترنت وقاعدة البيانات" : "⚠️ لا يوجد اتصال بالإنترنت";
+                document.getElementById("status-check").textContent = navigator.onLine ? "متصل" : "غير متصل بالإنترنت";
             }
 
             if (progress === 100) {
                 clearInterval(interval);
+                document.getElementById("app-topbar").style.display = "flex";
                 if (currentClientId) {
                     const snap = await get(ref(db, 'clients/' + currentClientId));
                     if (snap.exists()) {
                         currentClientData = snap.val();
-                        const firstName = (currentClientData.name || "بطل").split(" ")[0];
+                        const firstName = (currentClientData.name || "").trim().split(" ")[0];
                         welcomeArea.innerHTML = `<div class="welcome-msg">مرحبا يا كابتن <span>${firstName}</span></div>`;
                         setTimeout(() => {
                             document.getElementById("splash-screen").style.display = "none";
                             openClientMainApp();
-                        }, 1200);
+                        }, 1000);
                         return;
                     }
                 }
-                // لو مش مسجل دخول يظهر زرار تسجيل الدخول
                 welcomeArea.innerHTML = `<button class="btn-green" onclick="startLoginFlow()">تسجيل دخول</button>`;
             }
-        }, 100); // 50 خطوة × 100 مللي ثانية = 5 ثواني بالضبط
+        }, 100);
 
         window.startLoginFlow = function() {
             document.getElementById("splash-screen").style.display = "none";
@@ -318,6 +443,15 @@
             }
         };
 
+        window.openActivationScreen = function() {
+            verifiedTargetClientId = null;
+            selectedPhotoBase64 = "";
+            document.getElementById("act-step-1").style.display = "block";
+            document.getElementById("act-step-2").style.display = "none";
+            document.getElementById("client-photo-preview").style.display = "none";
+            showScreen('activate-screen');
+        };
+
         function renderPackagesDropdownAndOffers() {
             const sel = document.getElementById("reg-package");
             const offersBox = document.getElementById("offers-list-container");
@@ -326,24 +460,27 @@
 
             Object.entries(activePackages).forEach(([id, pkg]) => {
                 if (pkg.active !== false) {
-                    const typeDesc = pkg.type === 'sessions' ? `${pkg.sessions} سيشن` : `مدة ${pkg.durationDays} يوم`;
+                    const typeDesc = pkg.type === 'sessions'
+                        ? `${pkg.sessions} سيشن (${pkg.validityMode === 'with_expiry' ? pkg.durationDays + ' يوم' : 'مفتوح'})`
+                        : `${pkg.durationDays} يوم`;
+
                     const opt = document.createElement("option");
                     opt.value = id;
-                    opt.textContent = `${pkg.name} - (${typeDesc}) - ${pkg.price} ج.م`;
+                    opt.textContent = `${pkg.name} - ${typeDesc} - ${pkg.price} ج.م`;
                     sel.appendChild(opt);
 
                     const offerDiv = document.createElement("div");
                     offerDiv.className = "offer-item";
                     offerDiv.innerHTML = `
-                        <div style="display:flex; justify-content:space-between; font-weight:bold; color:var(--neon-green);">
-                            <span>🔥 ${pkg.name}</span>
+                        <div style="display:flex; justify-content:space-between; font-weight:bold; color:var(--neon-green); font-size:1.05rem;">
+                            <span>${pkg.name}</span>
                             <span>${pkg.price} ج.م</span>
                         </div>
                         <div class="offer-details">
-                            <p>📌 النظام: ${typeDesc}</p>
-                            <p>🎟️ الدعوات (Invitations): ${pkg.invitations || 0} دعوة</p>
-                            <p>👥 الاستخدام: ${pkg.sharable ? 'يمكن توزيعها/مشاركتها' : 'استخدام شخصي فقط'}</p>
-                            <p>⏳ الصلاحية: ${pkg.expiryDate || 'ساري المفعول'}</p>
+                            <p>المدة / السيشن: ${typeDesc}</p>
+                            <p>الدعوات: ${pkg.invitations || 0}</p>
+                            <p>الاستخدام: ${pkg.sharable ? 'قابل للتوزيع' : 'شخصي فقط'}</p>
+                            <p>الصلاحية: ${pkg.expiryDate || 'ساري'}</p>
                         </div>
                     `;
                     offerDiv.onclick = () => {
@@ -355,8 +492,8 @@
             });
         }
 
-        // إرسال طلب تسجيل عميل جديد عبر واتساب أو الإيميل
-        window.sendRegistrationRequest = function(method) {
+        // إرسال طلب تسجيل عميل جديد مع فحص عدم تكرار الرقم
+        window.sendRegistrationRequest = async function(method) {
             const name = document.getElementById("reg-name").value.trim();
             const phone = document.getElementById("reg-phone").value.trim();
             const email = document.getElementById("reg-email").value.trim();
@@ -366,40 +503,37 @@
             const pkgId = document.getElementById("reg-package").value;
             const pkg = activePackages[pkgId] || { name: "باقة عامة", price: 0 };
 
-            if (!name || !phone || !age) {
-                alert("يرجى ملء الاسم، رقم الهاتف، والسن");
-                return;
+            if (!name || !phone || !age) return alert("يرجى ملء الاسم، رقم التليفون، والسن");
+
+            const snap = await get(ref(db, 'clients'));
+            if (snap.exists()) {
+                let phoneExists = false;
+                snap.forEach(ch => { if (ch.val().phone === phone) phoneExists = true; });
+                if (phoneExists) return alert("رقم الهاتف مسجل بالفعل لعميل آخر!");
             }
 
-            // صياغة الرسالة المهيكلة لكي يقرأها الريسيبشن تلقائياً
             const structuredMsg = `طلب اشتراك Hany Power GYM:\nالاسم: ${name}\nالهاتف: ${phone}\nالإيميل: ${email || 'غير محدد'}\nالعنوان: ${address || 'غير محدد'}\nالنوع: ${gender}\nالسن: ${age}\nالباقة: ${pkg.name}\nكود_الباقة: ${pkgId}\nالسعر: ${pkg.price}`;
 
-            if (method === 'whatsapp') {
-                const waNum = (gymSettings.whatsapp || "").replace(/\D/g, '');
-                window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(structuredMsg)}`, '_blank');
-            } else {
-                window.open(`mailto:${gymSettings.email || ''}?subject=طلب اشتراك جديد - ${name}&body=${encodeURIComponent(structuredMsg)}`, '_blank');
-            }
-
+            openActivationScreen();
             document.getElementById("act-phone").value = phone;
-            showScreen('activate-screen');
+
+            if (method === 'whatsapp') {
+                openDirectWhatsApp(gymSettings.whatsapp, structuredMsg);
+            } else {
+                window.location.href = `mailto:${gymSettings.email || ''}?subject=${encodeURIComponent('طلب اشتراك - ' + name)}&body=${encodeURIComponent(structuredMsg)}`;
+            }
         };
 
-        // التفعيل الذكي مع تجاهل جملة "كود التفعيل"
-        window.activateAccount = async function() {
+        // الخطوة 1: التحقق من الكود أولاً قبل إظهار كلمة السر والصورة
+        window.verifyActivationCodeStep = async function() {
             const phone = document.getElementById("act-phone").value.trim();
             let rawCode = document.getElementById("act-code").value.trim();
-            const pass1 = document.getElementById("act-pass1").value.trim();
-            const pass2 = document.getElementById("act-pass2").value.trim();
+            if (!phone || !rawCode) return alert("أدخل رقم الموبايل وكود التفعيل");
 
-            if (!phone || !rawCode || !pass1) return alert("أكمل جميع الحقول");
-            if (pass1 !== pass2) return alert("كلمتا المرور غير متطابقتين!");
-
-            // تجاهل عبارة "كود التفعيل" أو أي نقطتين واستخراج الكود الصافي
             const cleanCode = rawCode.replace(/كود التفعيل/g, '').replace(/[:：\s-]/g, '').trim();
 
             const snap = await get(ref(db, 'clients'));
-            if (!snap.exists()) return alert("لم يتم تفعيل بياناتك بعد من الإدارة، انتظر قليلاً.");
+            if (!snap.exists()) return alert("لم يتم تسجيل بياناتك بعد من الإدارة.");
 
             let matchedId = null;
             snap.forEach(child => {
@@ -412,23 +546,63 @@
 
             if (!matchedId) return alert("كود التفعيل أو رقم الهاتف غير صحيح!");
 
-            await update(ref(db, 'clients/' + matchedId), {
+            verifiedTargetClientId = matchedId;
+            document.getElementById("act-step-1").style.display = "none";
+            document.getElementById("act-step-2").style.display = "block";
+        };
+
+        // معالجة الصورة الشخصية
+        window.handleImageSelect = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement("canvas");
+                    const maxSize = 260;
+                    let w = img.width, h = img.height;
+                    if (w > h) { if (w > maxSize) { h *= maxSize / w; w = maxSize; } }
+                    else { if (h > maxSize) { w *= maxSize / h; h = maxSize; } }
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0, w, h);
+                    selectedPhotoBase64 = canvas.toDataURL("image/jpeg", 0.75);
+                    const prev = document.getElementById("client-photo-preview");
+                    prev.src = selectedPhotoBase64;
+                    prev.style.display = "block";
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        // الخطوة 2: حفظ الباسورد والصورة لأول مرة والدخول
+        window.completeFirstSetup = async function() {
+            const pass1 = document.getElementById("act-pass1").value.trim();
+            const pass2 = document.getElementById("act-pass2").value.trim();
+
+            if (!pass1 || pass1.length < 4) return alert("أدخل كلمة مرور لا تقل عن 4 أحرف أو أرقام");
+            if (pass1 !== pass2) return alert("كلمتا المرور غير متطابقتين!");
+            if (!selectedPhotoBase64) return alert("يرجى التقاط أو اختيار صورة شخصية للكارنيه");
+
+            await update(ref(db, 'clients/' + verifiedTargetClientId), {
                 password: pass1,
+                photo: selectedPhotoBase64,
                 isActivated: true
             });
 
-            currentClientId = matchedId;
-            localStorage.setItem("hpg_client_id", matchedId);
-            const cSnap = await get(ref(db, 'clients/' + matchedId));
-            currentClientData = cSnap.val();
+            currentClientId = verifiedTargetClientId;
+            localStorage.setItem("hpg_client_id", verifiedTargetClientId);
             openClientMainApp();
         };
 
-        // تسجيل الدخول العادي
+        // تسجيل الدخول
         window.loginClient = async function() {
             const phone = document.getElementById("login-phone").value.trim();
             const pass = document.getElementById("login-pass").value.trim();
-            if (!phone || !pass) return alert("أدخل رقم الهاتف وكلمة المرور");
+            if (!phone || !pass) return alert("أدخل رقم الموبايل وكلمة المرور");
 
             const snap = await get(ref(db, 'clients'));
             if (!snap.exists()) return alert("لا توجد حسابات مسجلة");
@@ -439,51 +613,89 @@
                 if (c.phone === phone && c.password === pass) foundId = child.key;
             });
 
-            if (!foundId) return alert("بيانات الدخول غير صحيحة، أو استخدم شاشة كود التفعيل أول مرة.");
+            if (!foundId) return alert("بيانات الدخول غير صحيحة!");
 
             currentClientId = foundId;
             localStorage.setItem("hpg_client_id", foundId);
             openClientMainApp();
         };
 
+        async function checkAutoRollover(clientId, c) {
+            if (!c.queuedPackage) return;
+            const today = new Date().toISOString().split('T')[0];
+            const expiredByDate = c.endDate && today > c.endDate;
+            const expiredBySessions = c.remainingSessions !== null && c.remainingSessions !== undefined && c.remainingSessions <= 0;
+
+            if (expiredByDate || expiredBySessions) {
+                const q = c.queuedPackage;
+                await update(ref(db, 'clients/' + clientId), {
+                    packageId: q.packageId,
+                    packageName: q.packageName,
+                    startDate: q.startDate,
+                    endDate: q.endDate,
+                    remainingSessions: q.remainingSessions ?? null,
+                    invitationsLeft: (c.invitationsLeft || 0) + (q.invitationsLeft || 0),
+                    queuedPackage: null
+                });
+            }
+        }
+
         function openClientMainApp() {
             showScreen('main-screen');
             document.getElementById("client-bottom-nav").style.display = "flex";
+            document.getElementById("app-topbar").style.display = "flex";
 
-            // توليد الـ QR Code للسريال (Client ID)
             const qrContainer = document.getElementById("qrcode");
             qrContainer.innerHTML = "";
-            new QRCode(qrContainer, { text: currentClientId, width: 135, height: 135 });
+            new QRCode(qrContainer, { text: currentClientId, width: 180, height: 180 });
 
-            // متابعة حية لبيانات العميل
-            onValue(ref(db, 'clients/' + currentClientId), (snap) => {
-                if (!snap.exists()) return;
+            onValue(ref(db, 'clients/' + currentClientId), async (snap) => {
+                if (!snap.exists()) {
+                    logoutClient();
+                    return;
+                }
                 const c = snap.val();
+                await checkAutoRollover(currentClientId, c);
                 currentClientData = c;
+
+                const avatar = document.getElementById("ui-client-photo");
+                if (c.photo) {
+                    avatar.src = c.photo;
+                    avatar.style.display = "block";
+                } else {
+                    avatar.style.display = "none";
+                }
+
                 document.getElementById("ui-client-name").textContent = c.name;
                 document.getElementById("ui-client-pkg").textContent = c.packageName || "باقة عامة";
                 document.getElementById("ui-client-dates").textContent = `بداية: ${c.startDate || '--'} | نهاية: ${c.endDate || 'مفتوح'}`;
                 document.getElementById("ui-att-count").textContent = c.attendanceCount || 0;
                 document.getElementById("ui-inv-count").textContent = c.invitationsLeft || 0;
 
+                const nextBadge = document.getElementById("ui-next-pkg");
+                if (c.queuedPackage) {
+                    nextBadge.style.display = "block";
+                    nextBadge.textContent = `الباقة القادمة: ${c.queuedPackage.packageName} (تبدأ ${c.queuedPackage.startDate})`;
+                } else {
+                    nextBadge.style.display = "none";
+                }
+
                 const debtEl = document.getElementById("ui-client-debt");
                 if (c.debt && c.debt > 0) {
                     debtEl.style.display = "block";
-                    debtEl.textContent = `⚠️ متبقي مديونية: ${c.debt} ج.م`;
+                    debtEl.textContent = `متبقي مديونية: ${c.debt} ج.م`;
                 } else {
                     debtEl.style.display = "none";
                 }
 
-                // التحقق من الموافقة على الشروط والأحكام
                 if (!c.termsAccepted) {
-                    document.getElementById("terms-content").textContent = gymSettings.terms || "1. الالتزام بالزي الرياضي الكامل.\n2. الحفاظ على نظافة وترتيب الأوزان بعد التمرين.\n3. الاشتراك شخصي ولا يجوز التنازل عنه إلا حسب شروط الباقة.\n4. إدارة الجيم غير مسؤولة عن المفقودات الشخصية.";
+                    document.getElementById("terms-content").textContent = gymSettings.terms || "1. الالتزام بالزي الرياضي الكامل.\n2. الحفاظ على نظافة وترتيب الأوزان.\n3. الاشتراك شخصي.\n4. الإدارة غير مسؤولة عن المفقودات.";
                     document.getElementById("terms-modal").style.display = "flex";
                 }
             });
 
-            // التحقق من الرسائل الترويجية (تظهر مرة واحدة فقط لكل عميل)
             onValue(ref(db, 'promos'), (snap) => {
-                if (!snap.exists()) return;
+                if (!snap.exists() || !currentClientId) return;
                 const promos = snap.val();
                 const keys = Object.keys(promos);
                 const latestKey = keys[keys.length - 1];
@@ -497,7 +709,6 @@
                 }
             });
 
-            // متابعة الشكاوى والردود الخاصة بالعميل
             onValue(ref(db, 'complaints'), (snap) => {
                 const box = document.getElementById("client-complaints-history");
                 box.innerHTML = "";
@@ -506,14 +717,14 @@
                     const comp = ch.val();
                     if (comp.clientId === currentClientId) {
                         const div = document.createElement("div");
-                        div.style.cssText = "background:#0a0a0a; padding:10px; border-radius:8px; margin-bottom:8px; border:1px solid #222;";
+                        div.style.cssText = "background:#0a0a0a; padding:12px; border-radius:8px; margin-bottom:8px; border:1px solid #222;";
                         div.innerHTML = `
-                            <div style="color:#fff;">📝 شكواك: ${comp.text}</div>
-                            <div style="color:var(--neon-green); font-size:0.85rem; margin-top:5px;">
-                                ${comp.reply ? `✅ رد (${comp.repliedBy || 'الإدارة'}): ${comp.reply}` : '⏳ قيد المراجعة من الإدارة...'}
+                            <div style="color:#fff;">${comp.text}</div>
+                            <div style="color:var(--neon-green); font-size:0.9rem; margin-top:6px;">
+                                ${comp.reply ? `رد (${comp.repliedBy || 'الإدارة'}): ${comp.reply}` : 'قيد المراجعة...'}
                             </div>
                         `;
-                        box.appendChild(div);
+                        box.prepend(div);
                     }
                 });
             });
@@ -535,15 +746,15 @@
             document.getElementById("client-tab-home").style.display = tab === 'home' ? 'block' : 'none';
             document.getElementById("client-tab-offers").style.display = tab === 'offers' ? 'block' : 'none';
             document.getElementById("client-tab-complaints").style.display = tab === 'complaints' ? 'block' : 'none';
-            if (btn) {
-                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-            }
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            else if (tab === 'offers') document.getElementById('nav-btn-offers').classList.add('active');
+            else if (tab === 'home') document.getElementById('nav-btn-home').classList.add('active');
         };
 
         window.sendComplaint = function() {
             const txt = document.getElementById("complaint-text").value.trim();
-            if (!txt) return alert("اكتب نص الشكوى أولاً");
+            if (!txt) return alert("اكتب الرسالة أولاً");
             push(ref(db, 'complaints'), {
                 clientId: currentClientId,
                 clientName: currentClientData?.name || "عميل",
@@ -553,13 +764,18 @@
                 timestamp: new Date().toISOString()
             }).then(() => {
                 document.getElementById("complaint-text").value = "";
-                alert("تم إرسال شكواك للإدارة بنجاح");
+                alert("تم الإرسال");
             });
         };
 
         window.logoutClient = function() {
             localStorage.removeItem("hpg_client_id");
-            location.reload();
+            currentClientId = null;
+            currentClientData = null;
+            document.getElementById("client-bottom-nav").style.display = "none";
+            document.getElementById("login-phone").value = "";
+            document.getElementById("login-pass").value = "";
+            showScreen('login-screen');
         };
     </script>
 </body>
