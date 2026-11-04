@@ -4,156 +4,241 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hany Power GYM - تطبيق العميل</title>
-    <!-- مكتبة لإنشاء الـ QR Code -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: #0f172a; color: #fff; padding-bottom: 70px; }
-        
-        /* شاشة تسجيل الدخول */
-        #auth-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #0f172a; display: flex; justify-content: center; align-items: center; z-index: 9999;
-            padding: 20px;
+        :root {
+            --bg-black: #050505;
+            --card-bg: #111111;
+            --neon-green: #1be11b;
+            --neon-glow: 0 0 15px rgba(27, 225, 27, 0.7);
+            --silver: #d1d5db;
+            --border-color: #262626;
         }
-        .auth-box { background: #1e293b; padding: 30px; border-radius: 15px; width: 100%; max-width: 400px; border: 1px solid #334155; text-align: center; }
-        .auth-box h2 { color: #f59e0b; margin-bottom: 20px; }
-        .auth-input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #fff; font-size: 1rem; outline: none; }
-        
-        .container { max-width: 450px; margin: 0 auto; padding: 20px; }
-        
-        /* الهيدر */
-        .header { text-align: center; margin-bottom: 20px; }
-        .header h1 { color: #f59e0b; font-size: 1.6rem; text-transform: uppercase; }
-        
-        /* التابات وعرض المحتوى */
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: var(--bg-black); color: #fff; min-height: 100vh; overflow-x: hidden; padding-bottom: 75px; }
 
-        /* الكروت والمعلومات */
-        .card { background: #1e293b; border-radius: 15px; padding: 20px; margin-bottom: 20px; border: 1px solid #334155; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        .card h3 { color: #f59e0b; margin-bottom: 15px; font-size: 1.1rem; border-bottom: 1px solid #334155; padding-bottom: 8px; }
-        .info-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.95rem; }
-        .info-row span:first-child { color: #94a3b8; }
-        .info-row span:last-child { font-weight: bold; color: #fff; }
+        /* 1. Splash Screen */
+        #splash-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 10000; display: flex; flex-direction: column;
+            justify-content: space-between; align-items: center; padding: 30px 20px;
+        }
+        .splash-img-box { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; }
+        .splash-img-box img { width: 100%; max-width: 360px; max-height: 70vh; object-fit: contain; filter: drop-shadow(0 0 20px rgba(27,225,27,0.4)); }
+        .loading-area { width: 100%; max-width: 380px; text-align: center; margin-bottom: 20px; }
+        .progress-container { width: 100%; height: 14px; background: #1a1a1a; border-radius: 10px; border: 1px solid #333; overflow: hidden; margin: 10px 0; }
+        .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #0a8a0a, var(--neon-green), #7dff7d); box-shadow: var(--neon-glow); transition: width 0.1s linear; }
+        .progress-text { color: var(--neon-green); font-weight: bold; font-size: 1rem; text-shadow: var(--neon-glow); }
+        #welcome-area { margin-top: 12px; min-height: 45px; }
+        .welcome-msg { font-size: 1.3rem; font-weight: bold; color: #fff; }
+        .welcome-msg span { color: var(--neon-green); }
 
-        /* QR Code */
-        .qr-section { text-align: center; }
-        #qrcode { background: #fff; padding: 12px; display: inline-block; border-radius: 10px; margin: 10px 0; }
-        
-        /* GPS */
-        .gps-box { background: #0f172a; padding: 10px; border-radius: 8px; text-align: center; margin-top: 10px; font-size: 0.85rem; }
-        .status-badge { display: inline-block; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; margin-top: 5px; }
-        .badge-success { background: #065f46; color: #34d399; }
-        .badge-danger { background: #7f1d1d; color: #fca5a5; }
+        /* Buttons & Inputs */
+        .btn-green {
+            background: linear-gradient(135deg, #109c10, var(--neon-green)); color: #000; font-weight: 800;
+            border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 1rem;
+            box-shadow: var(--neon-glow); transition: 0.3s; width: 100%; text-align: center;
+        }
+        .btn-green:hover { transform: scale(1.02); }
+        .btn-outline { background: transparent; border: 2px solid var(--neon-green); color: var(--neon-green); font-weight: bold; padding: 10px; border-radius: 10px; cursor: pointer; width: 100%; margin-top: 10px; }
+        input, select, textarea {
+            width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px;
+            border: 1px solid var(--border-color); background: #0a0a0a; color: #fff; font-size: 0.95rem; outline: none;
+        }
+        input:focus, select:focus, textarea:focus { border-color: var(--neon-green); box-shadow: 0 0 8px rgba(27,225,27,0.3); }
 
-        /* الشات */
-        .chat-box { height: 250px; background: #0f172a; border-radius: 8px; overflow-y: auto; padding: 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; }
-        .message { padding: 8px 12px; border-radius: 8px; max-width: 80%; font-size: 0.9rem; }
-        .message.user { background: #3b82f6; align-self: flex-start; }
-        .message.coach { background: #334155; align-self: flex-end; }
-        .chat-input-area { display: flex; gap: 8px; }
-        .chat-input-area input { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #fff; outline: none; }
-        
-        /* سجل الحضور والانصراف */
-        .log-list { max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-        .log-item { background: #0f172a; padding: 10px 15px; border-radius: 8px; display: flex; justify-content: space-between; font-size: 0.9rem; border-right: 4px solid #f59e0b; }
+        /* Screens & Modals */
+        .screen { display: none; max-width: 480px; margin: 0 auto; padding: 20px; }
+        .screen.active { display: block; }
+        .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 15px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.6); }
+        .title-green { color: var(--neon-green); text-align: center; margin-bottom: 15px; font-size: 1.4rem; }
+        .link-green { color: var(--neon-green); text-align: center; display: block; margin-top: 15px; cursor: pointer; font-weight: bold; text-decoration: underline; }
 
-        /* شريط التابات السفلي */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #1e293b; display: flex; border-top: 1px solid #334155; z-index: 1000; }
-        .nav-item { flex: 1; text-align: center; padding: 12px 0; color: #94a3b8; cursor: pointer; font-size: 0.9rem; font-weight: bold; transition: 0.3s; }
-        .nav-item.active { color: #f59e0b; background: rgba(245, 158, 11, 0.05); border-top: 2px solid #f59e0b; }
+        /* Main Client Dashboard */
+        .client-header { text-align: center; padding: 15px; border-bottom: 2px solid var(--neon-green); margin-bottom: 15px; background: var(--card-bg); border-radius: 15px; }
+        .client-header h2 { font-size: 1.6rem; color: #fff; margin-bottom: 5px; }
+        .client-header .pkg-badge { color: var(--neon-green); font-weight: bold; font-size: 1.05rem; margin-bottom: 6px; }
+        .client-header .dates { color: var(--silver); font-size: 0.85rem; }
 
-        .btn-main { width: 100%; padding: 12px; background: #f59e0b; color: #0f172a; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 10px; transition: 0.3s; }
-        .btn-main:hover { background: #d97706; }
+        .middle-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px; align-items: stretch; margin-bottom: 15px; }
+        .qr-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 15px; padding: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #qrcode { background: #fff; padding: 10px; border-radius: 10px; margin-bottom: 8px; }
+        .stats-side { display: flex; flex-direction: column; gap: 12px; }
+        .stat-box { flex: 1; background: var(--card-bg); border: 1px solid var(--neon-green); border-radius: 15px; padding: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .stat-box .big-num { font-size: 2.2rem; font-weight: 900; color: var(--neon-green); text-shadow: var(--neon-glow); line-height: 1; }
+        .stat-box .label { font-size: 0.8rem; color: var(--silver); margin-top: 5px; }
+
+        .wide-tab {
+            background: linear-gradient(90deg, #111, #1a2e1a, #111); border: 2px solid var(--neon-green);
+            color: var(--neon-green); padding: 15px; border-radius: 12px; text-align: center;
+            font-size: 1.2rem; font-weight: bold; cursor: pointer; margin-bottom: 15px; box-shadow: var(--neon-glow);
+        }
+
+        /* Offers & Messages */
+        .offer-item { background: #181818; border-right: 4px solid var(--neon-green); padding: 12px; border-radius: 8px; margin-bottom: 10px; cursor: pointer; }
+        .offer-details { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid #333; color: var(--silver); font-size: 0.9rem; }
+
+        /* Bottom Nav */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #0a0a0a; border-top: 1px solid var(--border-color); display: none; z-index: 999; }
+        .nav-btn { flex: 1; padding: 14px 0; text-align: center; color: var(--silver); cursor: pointer; font-weight: bold; font-size: 0.9rem; }
+        .nav-btn.active { color: var(--neon-green); border-top: 3px solid var(--neon-green); background: #111; }
+
+        /* Modals */
+        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); display:none; justify-content:center; align-items:center; z-index:9999; padding:20px; }
+        .modal-box { background: var(--card-bg); border: 2px solid var(--neon-green); border-radius: 15px; padding: 20px; width: 100%; max-width: 440px; max-height: 85vh; overflow-y: auto; }
     </style>
 </head>
 <body>
 
-    <!-- شاشة تسجيل الدخول -->
-    <div id="auth-screen">
-        <div class="auth-box">
-            <h2>Hany Power GYM</h2>
-            <p style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 20px;">قم بتسجيل الدخول برقم الهاتف وكلمة المرور المؤقتة</p>
-            <input type="text" id="login-phone" class="auth-input" placeholder="رقم الهاتف">
-            <input type="password" id="login-pass" class="auth-input" placeholder="كلمة المرور">
-            <button class="btn-main" onclick="handleLogin()">دخول</button>
+    <!-- 1. شاشة البداية (5 ثواني) -->
+    <div id="splash-screen">
+        <div class="splash-img-box">
+            <img src="HanyLogo.jpg" alt="Hany Power GYM" onerror="this.style.display='none'">
+        </div>
+        <div class="loading-area">
+            <div class="progress-text" id="progress-text">0%</div>
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div id="status-check" style="color:var(--silver); font-size:0.8rem;">جاري الاتصال بقاعدة البيانات وفحص الإنترنت...</div>
+            <div id="welcome-area"></div>
         </div>
     </div>
 
-    <!-- نافذة تغيير كلمة المرور أول مرة -->
-    <div id="change-pass-screen" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 9999; justify-content: center; align-items: center; padding: 20px;">
-        <div class="auth-box">
-            <h2 style="color: #34d399;">تغيير كلمة المرور</h2>
-            <p style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 20px;">هذه أول مرة تسجل بها الدخول، يرجى تعيين كلمة مرور جديدة:</p>
-            <input type="password" id="new-pass" class="auth-input" placeholder="كلمة المرور الجديدة">
-            <button class="btn-main" onclick="saveNewPassword()">حفظ ودخول</button>
+    <!-- 2. شاشة تسجيل الدخول -->
+    <div id="login-screen" class="screen">
+        <div class="card">
+            <h2 class="title-green">تسجيل الدخول</h2>
+            <input type="tel" id="login-phone" placeholder="رقم الموبايل">
+            <input type="password" id="login-pass" placeholder="كلمة المرور أو كود التفعيل">
+            <button class="btn-green" onclick="loginClient()">دخول</button>
+            <span class="link-green" onclick="showScreen('register-screen')">تسجيل عميل جديد</span>
+            <span class="link-green" style="font-size:0.85rem; color:#9ca3af;" onclick="showScreen('activate-screen')">لديك كود تفعيل؟ اضغط هنا</span>
         </div>
     </div>
 
-    <div class="container">
-        <div class="header">
-            <h1>Hany Power GYM</h1>
+    <!-- 3. شاشة تسجيل عميل جديد -->
+    <div id="register-screen" class="screen">
+        <div class="card">
+            <h2 class="title-green">تسجيل عميل جديد</h2>
+            <input type="text" id="reg-name" placeholder="الاسم بالكامل">
+            <input type="tel" id="reg-phone" placeholder="رقم التليفون (عليه واتساب)">
+            <input type="email" id="reg-email" placeholder="البريد الإلكتروني (اختياري)">
+            <input type="text" id="reg-address" placeholder="العنوان">
+            <div style="display:flex; gap:10px;">
+                <select id="reg-gender">
+                    <option value="ذكر">ذكر</option>
+                    <option value="أنثى">أنثى</option>
+                </select>
+                <input type="number" id="reg-age" placeholder="السن">
+            </div>
+            <label style="color:var(--silver); font-size:0.85rem; display:block; margin-bottom:5px;">اختر الباقة / العرض المتاح:</label>
+            <select id="reg-package"></select>
+            
+            <button class="btn-green" style="margin-bottom:10px;" onclick="sendRegistrationRequest('whatsapp')">📲 إرسال الطلب عبر واتساب</button>
+            <button class="btn-outline" onclick="sendRegistrationRequest('email')">📧 إرسال الطلب عبر الإيميل</button>
+            <span class="link-green" onclick="showScreen('login-screen')">العودة لتسجيل الدخول</span>
+        </div>
+    </div>
+
+    <!-- 4. شاشة الانتظار وتفعيل الحساب -->
+    <div id="activate-screen" class="screen">
+        <div class="card">
+            <h2 class="title-green">تفعيل الحساب</h2>
+            <p id="work-hours-note" style="color:var(--silver); font-size:0.9rem; text-align:center; margin-bottom:15px;"></p>
+            <input type="tel" id="act-phone" placeholder="رقم هاتفك المسجل">
+            <input type="text" id="act-code" placeholder="الصق رسالة أو كود التفعيل هنا">
+            <input type="password" id="act-pass1" placeholder="كلمة المرور الجديدة">
+            <input type="password" id="act-pass2" placeholder="تأكيد كلمة المرور الجديدة">
+            <button class="btn-green" onclick="activateAccount()">تفعيل وحفظ كلمة المرور</button>
+            <span class="link-green" onclick="showScreen('login-screen')">رجوع</span>
+        </div>
+    </div>
+
+    <!-- 5. الشاشة الرئيسية للعميل -->
+    <div id="main-screen" class="screen">
+        <!-- تاب 1: البروفايل والـ QR -->
+        <div id="client-tab-home">
+            <div class="client-header">
+                <h2 id="ui-client-name">--</h2>
+                <div class="pkg-badge" id="ui-client-pkg">--</div>
+                <div class="dates" id="ui-client-dates">بداية: -- | نهاية: --</div>
+                <div id="ui-client-debt" style="color:#ef4444; font-weight:bold; font-size:0.9rem; margin-top:5px; display:none;"></div>
+            </div>
+
+            <div class="middle-grid">
+                <div class="qr-card">
+                    <div id="qrcode"></div>
+                    <span style="font-size:0.75rem; color:var(--silver);">امسح الكود بالريسيبشن للدخول</span>
+                    <span id="gps-badge" style="font-size:0.75rem; color:var(--neon-green); margin-top:5px;"></span>
+                </div>
+                <div class="stats-side">
+                    <div class="stat-box">
+                        <div class="big-num" id="ui-att-count">0</div>
+                        <div class="label">عدد مرات الحضور</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="big-num" id="ui-inv-count">0</div>
+                        <div class="label">الدعوات المتاحة (Invitations)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wide-tab" onclick="switchClientTab('offers')">🔥 العروض الحالية السارية</div>
+            <button class="btn-outline" onclick="logoutClient()" style="border-color:#ef4444; color:#ef4444;">تسجيل خروج</button>
         </div>
 
-        <!-- التاب الأولى: بيانات العميل والـ QR والـ GPS -->
-        <div id="tab-1" class="tab-content active">
+        <!-- تاب 2: صفحة العروض السارية -->
+        <div id="client-tab-offers" style="display:none;">
             <div class="card">
-                <h3>📊 بيانات العميل والاشتراك</h3>
-                <div class="info-row"><span>اسم العميل:</span><span id="client-name">جاري التحميل...</span></div>
-                <div class="info-row"><span>نوع الباقة:</span><span id="package-type">--</span></div>
-                <div class="info-row"><span>إجمالي الحضور:</span><span id="attendance-count">0 مرة</span></div>
-                <div class="info-row"><span>المتبقي:</span><span id="remaining-sessions">--</span></div>
-                <div class="info-row"><span>تاريخ الانتهاء:</span><span id="expiry-date">--</span></div>
-            </div>
-
-            <div class="card qr-section">
-                <h3>🆔 الكارنيه الإلكتروني</h3>
-                <div id="qrcode"></div>
-                <div class="gps-box">
-                    <p>حالة الحضور التلقائي (GPS):</p>
-                    <span id="gps-status" class="status-badge">جاري التحقق...</span>
-                </div>
-                <button class="btn-main" onclick="checkGPSLocation()">🔄 إعادة فحص الموقع</button>
+                <h3 class="title-green">العروض والباقات السارية</h3>
+                <div id="offers-list-container"></div>
+                <button class="btn-outline" onclick="switchClientTab('home')">العودة للرئيسية</button>
             </div>
         </div>
 
-        <!-- التاب الثانية: الشات مع الكابتن -->
-        <div id="tab-2" class="tab-content">
+        <!-- تاب 3: نظام الميل المصغر للشكاوى والتواصل -->
+        <div id="client-tab-complaints" style="display:none;">
             <div class="card">
-                <h3>💬 الشات مع الكابتن</h3>
-                <div class="chat-box" id="chat-messages">
-                    <div class="message coach">أهلاً بك يا بطل، جاهز لتمرين اليوم؟</div>
-                </div>
-                <div class="chat-input-area">
-                    <input type="text" id="chat-input" placeholder="اكتب رسالتك..." onkeypress="if(event.key==='Enter') sendMessage()">
-                    <button class="btn-main" style="width: auto; margin-top:0;" onclick="sendMessage()">إرسال</button>
-                </div>
+                <h3 class="title-green">📩 صندوق الشكاوى والمراسلات</h3>
+                <textarea id="complaint-text" rows="3" placeholder="اكتب شكواك أو استفسارك لإدارة الجيم..."></textarea>
+                <button class="btn-green" onclick="sendComplaint()">إرسال الشكوى للإدارة</button>
             </div>
-        </div>
-
-        <!-- التاب الثالثة: سجل الحضور والانصراف -->
-        <div id="tab-3" class="tab-content">
             <div class="card">
-                <h3>📅 سجل الحضور والانصراف</h3>
-                <div class="log-list" id="attendance-log-list">
-                    <p style="color: #94a3b8; text-align: center;">جاري جلب السجل...</p>
-                </div>
+                <h4 style="color:var(--neon-green); margin-bottom:10px;">سجل المراسلات والردود:</h4>
+                <div id="client-complaints-history"></div>
             </div>
         </div>
     </div>
 
-    <!-- شريط التنقل السفلي (3 تابات) -->
-    <div class="bottom-nav">
-        <div class="nav-item active" onclick="switchTab(1, this)">🏠 الرئيسية والـ QR</div>
-        <div class="nav-item" onclick="switchTab(2, this)">💬 شات الكابتن</div>
-        <div class="nav-item" onclick="switchTab(3, this)">📋 سجل الحضور</div>
+    <!-- شريط التنقل السفلي للعميل -->
+    <div class="bottom-nav" id="client-bottom-nav">
+        <div class="nav-btn active" onclick="switchClientTab('home', this)">🏠 الرئيسية والـ QR</div>
+        <div class="nav-btn" onclick="switchClientTab('offers', this)">🔥 العروض</div>
+        <div class="nav-btn" onclick="switchClientTab('complaints', this)">📩 الشكاوى والبريد</div>
     </div>
 
-    <!-- سكربتات النظام والربط بـ Firebase -->
+    <!-- نافذة الشروط والأحكام -->
+    <div class="modal-overlay" id="terms-modal">
+        <div class="modal-box">
+            <h3 class="title-green">الشروط والأحكام - Hany Power GYM</h3>
+            <div id="terms-content" style="color:var(--silver); font-size:0.9rem; line-height:1.6; margin-bottom:15px; white-space:pre-line;"></div>
+            <button class="btn-green" onclick="acceptTerms()">أوافق على الشروط والأحكام</button>
+        </div>
+    </div>
+
+    <!-- نافذة الرسالة الترويجية (تظهر مرة واحدة) -->
+    <div class="modal-overlay" id="promo-modal">
+        <div class="modal-box" style="text-align:center;">
+            <h3 class="title-green">🎉 إشعار وعرض خاص لك!</h3>
+            <p id="promo-content" style="color:#fff; font-size:1.05rem; margin:15px 0; line-height:1.6;"></p>
+            <button class="btn-green" onclick="closePromoModal()">حسناً، فهمت</button>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, get, set, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, get, set, push, update, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB7uyPEK300Wt97PALGgAqezHH7-ddv6jA",
@@ -169,190 +254,313 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        let currentClientId = localStorage.getItem("hany_client_id");
+        let gymSettings = { whatsapp: "201000000000", email: "info@hanypowergym.com", workDays: "يومياً من 10 ص إلى 12 م", terms: "" };
+        let activePackages = {};
+        let currentClientId = localStorage.getItem("hpg_client_id");
+        let currentClientData = null;
 
-        // التحقق من تسجيل الدخول المخزن مسبقاً
-        if (currentClientId) {
-            document.getElementById("auth-screen").style.display = "none";
-            loadClientData(currentClientId);
+        // جلب البيانات أثناء شاشة البداية (5 ثواني)
+        onValue(ref(db, 'gym_settings'), (snap) => {
+            if (snap.exists()) gymSettings = { ...gymSettings, ...snap.val() };
+        });
+
+        onValue(ref(db, 'packages'), (snap) => {
+            activePackages = snap.val() || {};
+            renderPackagesDropdownAndOffers();
+        });
+
+        // تشغيل عداد الـ 5 ثواني من 0% إلى 100%
+        let progress = 0;
+        const bar = document.getElementById("progress-bar");
+        const txt = document.getElementById("progress-text");
+        const welcomeArea = document.getElementById("welcome-area");
+
+        const interval = setInterval(async () => {
+            progress += 2;
+            if (progress > 100) progress = 100;
+            bar.style.width = progress + "%";
+            txt.textContent = progress + "%";
+
+            if (progress === 60) {
+                document.getElementById("status-check").textContent = navigator.onLine ? "✅ متصل بالإنترنت وقاعدة البيانات" : "⚠️ لا يوجد اتصال بالإنترنت";
+            }
+
+            if (progress === 100) {
+                clearInterval(interval);
+                if (currentClientId) {
+                    const snap = await get(ref(db, 'clients/' + currentClientId));
+                    if (snap.exists()) {
+                        currentClientData = snap.val();
+                        const firstName = (currentClientData.name || "بطل").split(" ")[0];
+                        welcomeArea.innerHTML = `<div class="welcome-msg">مرحبا يا كابتن <span>${firstName}</span></div>`;
+                        setTimeout(() => {
+                            document.getElementById("splash-screen").style.display = "none";
+                            openClientMainApp();
+                        }, 1200);
+                        return;
+                    }
+                }
+                // لو مش مسجل دخول يظهر زرار تسجيل الدخول
+                welcomeArea.innerHTML = `<button class="btn-green" onclick="startLoginFlow()">تسجيل دخول</button>`;
+            }
+        }, 100); // 50 خطوة × 100 مللي ثانية = 5 ثواني بالضبط
+
+        window.startLoginFlow = function() {
+            document.getElementById("splash-screen").style.display = "none";
+            showScreen('login-screen');
+        };
+
+        window.showScreen = function(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if (id === 'activate-screen') {
+                document.getElementById("work-hours-note").textContent = `انتظر إدارة الجيم ستتواصل معك خلال دقائق في أوقات العمل الرسمية (${gymSettings.workDays || 'يومياً'})`;
+            }
+        };
+
+        function renderPackagesDropdownAndOffers() {
+            const sel = document.getElementById("reg-package");
+            const offersBox = document.getElementById("offers-list-container");
+            sel.innerHTML = "";
+            offersBox.innerHTML = "";
+
+            Object.entries(activePackages).forEach(([id, pkg]) => {
+                if (pkg.active !== false) {
+                    const typeDesc = pkg.type === 'sessions' ? `${pkg.sessions} سيشن` : `مدة ${pkg.durationDays} يوم`;
+                    const opt = document.createElement("option");
+                    opt.value = id;
+                    opt.textContent = `${pkg.name} - (${typeDesc}) - ${pkg.price} ج.م`;
+                    sel.appendChild(opt);
+
+                    const offerDiv = document.createElement("div");
+                    offerDiv.className = "offer-item";
+                    offerDiv.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; font-weight:bold; color:var(--neon-green);">
+                            <span>🔥 ${pkg.name}</span>
+                            <span>${pkg.price} ج.م</span>
+                        </div>
+                        <div class="offer-details">
+                            <p>📌 النظام: ${typeDesc}</p>
+                            <p>🎟️ الدعوات (Invitations): ${pkg.invitations || 0} دعوة</p>
+                            <p>👥 الاستخدام: ${pkg.sharable ? 'يمكن توزيعها/مشاركتها' : 'استخدام شخصي فقط'}</p>
+                            <p>⏳ الصلاحية: ${pkg.expiryDate || 'ساري المفعول'}</p>
+                        </div>
+                    `;
+                    offerDiv.onclick = () => {
+                        const det = offerDiv.querySelector('.offer-details');
+                        det.style.display = det.style.display === 'block' ? 'none' : 'block';
+                    };
+                    offersBox.appendChild(offerDiv);
+                }
+            });
         }
 
-        // دالة تسجيل الدخول
-        window.handleLogin = function() {
+        // إرسال طلب تسجيل عميل جديد عبر واتساب أو الإيميل
+        window.sendRegistrationRequest = function(method) {
+            const name = document.getElementById("reg-name").value.trim();
+            const phone = document.getElementById("reg-phone").value.trim();
+            const email = document.getElementById("reg-email").value.trim();
+            const address = document.getElementById("reg-address").value.trim();
+            const gender = document.getElementById("reg-gender").value;
+            const age = document.getElementById("reg-age").value.trim();
+            const pkgId = document.getElementById("reg-package").value;
+            const pkg = activePackages[pkgId] || { name: "باقة عامة", price: 0 };
+
+            if (!name || !phone || !age) {
+                alert("يرجى ملء الاسم، رقم الهاتف، والسن");
+                return;
+            }
+
+            // صياغة الرسالة المهيكلة لكي يقرأها الريسيبشن تلقائياً
+            const structuredMsg = `طلب اشتراك Hany Power GYM:\nالاسم: ${name}\nالهاتف: ${phone}\nالإيميل: ${email || 'غير محدد'}\nالعنوان: ${address || 'غير محدد'}\nالنوع: ${gender}\nالسن: ${age}\nالباقة: ${pkg.name}\nكود_الباقة: ${pkgId}\nالسعر: ${pkg.price}`;
+
+            if (method === 'whatsapp') {
+                const waNum = (gymSettings.whatsapp || "").replace(/\D/g, '');
+                window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(structuredMsg)}`, '_blank');
+            } else {
+                window.open(`mailto:${gymSettings.email || ''}?subject=طلب اشتراك جديد - ${name}&body=${encodeURIComponent(structuredMsg)}`, '_blank');
+            }
+
+            document.getElementById("act-phone").value = phone;
+            showScreen('activate-screen');
+        };
+
+        // التفعيل الذكي مع تجاهل جملة "كود التفعيل"
+        window.activateAccount = async function() {
+            const phone = document.getElementById("act-phone").value.trim();
+            let rawCode = document.getElementById("act-code").value.trim();
+            const pass1 = document.getElementById("act-pass1").value.trim();
+            const pass2 = document.getElementById("act-pass2").value.trim();
+
+            if (!phone || !rawCode || !pass1) return alert("أكمل جميع الحقول");
+            if (pass1 !== pass2) return alert("كلمتا المرور غير متطابقتين!");
+
+            // تجاهل عبارة "كود التفعيل" أو أي نقطتين واستخراج الكود الصافي
+            const cleanCode = rawCode.replace(/كود التفعيل/g, '').replace(/[:：\s-]/g, '').trim();
+
+            const snap = await get(ref(db, 'clients'));
+            if (!snap.exists()) return alert("لم يتم تفعيل بياناتك بعد من الإدارة، انتظر قليلاً.");
+
+            let matchedId = null;
+            snap.forEach(child => {
+                const c = child.val();
+                const dbCode = String(c.activationCode || '').replace(/[:：\s-]/g, '').trim();
+                if (c.phone === phone && dbCode === cleanCode) {
+                    matchedId = child.key;
+                }
+            });
+
+            if (!matchedId) return alert("كود التفعيل أو رقم الهاتف غير صحيح!");
+
+            await update(ref(db, 'clients/' + matchedId), {
+                password: pass1,
+                isActivated: true
+            });
+
+            currentClientId = matchedId;
+            localStorage.setItem("hpg_client_id", matchedId);
+            const cSnap = await get(ref(db, 'clients/' + matchedId));
+            currentClientData = cSnap.val();
+            openClientMainApp();
+        };
+
+        // تسجيل الدخول العادي
+        window.loginClient = async function() {
             const phone = document.getElementById("login-phone").value.trim();
             const pass = document.getElementById("login-pass").value.trim();
+            if (!phone || !pass) return alert("أدخل رقم الهاتف وكلمة المرور");
 
-            if (!phone || !pass) {
-                alert("يرجى إدخال رقم الهاتف وكلمة المرور");
-                return;
-            }
+            const snap = await get(ref(db, 'clients'));
+            if (!snap.exists()) return alert("لا توجد حسابات مسجلة");
 
-            const clientsRef = ref(db, 'clients');
-            get(clientsRef).then((snapshot) => {
-                if (snapshot.exists()) {
-                    let found = false;
-                    snapshot.forEach((childSnapshot) => {
-                        const data = childSnapshot.val();
-                        if (data.phone === phone) {
-                            found = true;
-                            currentClientId = childSnapshot.key;
-                            
-                            // التحقق إذا كانت أول مرة (كلمة المرور الافتراضية أو تتطلب تغير)
-                            if (data.password === pass) {
-                                if (data.isFirstLogin !== false) {
-                                    document.getElementById("auth-screen").style.display = "none";
-                                    document.getElementById("change-pass-screen").style.display = "flex";
-                                } else {
-                                    localStorage.setItem("hany_client_id", currentClientId);
-                                    document.getElementById("auth-screen").style.display = "none";
-                                    loadClientData(currentClientId);
-                                }
-                            } else {
-                                alert("كلمة المرور غير صحيحة");
-                            }
-                        }
-                    });
-                    if (!found) alert("رقم الهاتف غير مسجل في النظام");
+            let foundId = null;
+            snap.forEach(child => {
+                const c = child.val();
+                if (c.phone === phone && c.password === pass) foundId = child.key;
+            });
+
+            if (!foundId) return alert("بيانات الدخول غير صحيحة، أو استخدم شاشة كود التفعيل أول مرة.");
+
+            currentClientId = foundId;
+            localStorage.setItem("hpg_client_id", foundId);
+            openClientMainApp();
+        };
+
+        function openClientMainApp() {
+            showScreen('main-screen');
+            document.getElementById("client-bottom-nav").style.display = "flex";
+
+            // توليد الـ QR Code للسريال (Client ID)
+            const qrContainer = document.getElementById("qrcode");
+            qrContainer.innerHTML = "";
+            new QRCode(qrContainer, { text: currentClientId, width: 135, height: 135 });
+
+            // متابعة حية لبيانات العميل
+            onValue(ref(db, 'clients/' + currentClientId), (snap) => {
+                if (!snap.exists()) return;
+                const c = snap.val();
+                currentClientData = c;
+                document.getElementById("ui-client-name").textContent = c.name;
+                document.getElementById("ui-client-pkg").textContent = c.packageName || "باقة عامة";
+                document.getElementById("ui-client-dates").textContent = `بداية: ${c.startDate || '--'} | نهاية: ${c.endDate || 'مفتوح'}`;
+                document.getElementById("ui-att-count").textContent = c.attendanceCount || 0;
+                document.getElementById("ui-inv-count").textContent = c.invitationsLeft || 0;
+
+                const debtEl = document.getElementById("ui-client-debt");
+                if (c.debt && c.debt > 0) {
+                    debtEl.style.display = "block";
+                    debtEl.textContent = `⚠️ متبقي مديونية: ${c.debt} ج.م`;
                 } else {
-                    alert("لا يوجد عملاء مسجلين حالياً");
+                    debtEl.style.display = "none";
                 }
-            });
-        };
 
-        // حفظ كلمة المرور الجديدة أول مرة
-        window.saveNewPassword = function() {
-            const newPass = document.getElementById("new-pass").value.trim();
-            if (!newPass || newPass.length < 4) {
-                alert("يرجى إدخال كلمة مرور صالحة (4 أرقام على الأقل)");
-                return;
-            }
-
-            update(ref(db, 'clients/' + currentClientId), {
-                password: newPass,
-                isFirstLogin: false
-            }).then(() => {
-                localStorage.setItem("hany_client_id", currentClientId);
-                document.getElementById("change-pass-screen").style.display = "none";
-                loadClientData(currentClientId);
-            });
-        };
-
-        // تحميل بيانات العميل بعد الدخول الناجح
-        function loadClientData(clientId) {
-            // توليد الـ QR Code
-            new QRCode(document.getElementById("qrcode"), { text: clientId, width: 130, height: 130 });
-
-            // جلب بيانات العميل من قاعدة البيانات
-            onValue(ref(db, 'clients/' + clientId), (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    document.getElementById("client-name").textContent = data.name || "عميل مميز";
-                    document.getElementById("package-type").textContent = data.packageName || "اشتراك عام";
-                    document.getElementById("remaining-sessions").textContent = data.remainingSessions ? data.remainingSessions + " سيشن" : "حتى " + (data.expiryDate || "--");
+                // التحقق من الموافقة على الشروط والأحكام
+                if (!c.termsAccepted) {
+                    document.getElementById("terms-content").textContent = gymSettings.terms || "1. الالتزام بالزي الرياضي الكامل.\n2. الحفاظ على نظافة وترتيب الأوزان بعد التمرين.\n3. الاشتراك شخصي ولا يجوز التنازل عنه إلا حسب شروط الباقة.\n4. إدارة الجيم غير مسؤولة عن المفقودات الشخصية.";
+                    document.getElementById("terms-modal").style.display = "flex";
                 }
             });
 
-            // جلب سجل الحضور
-            onValue(ref(db, 'attendance_logs/' + clientId), (snapshot) => {
-                const logs = snapshot.val();
-                const logList = document.getElementById("attendance-log-list");
-                logList.innerHTML = "";
-                if (logs) {
-                    let count = 0;
-                    Object.values(logs).forEach(log => {
-                        count++;
+            // التحقق من الرسائل الترويجية (تظهر مرة واحدة فقط لكل عميل)
+            onValue(ref(db, 'promos'), (snap) => {
+                if (!snap.exists()) return;
+                const promos = snap.val();
+                const keys = Object.keys(promos);
+                const latestKey = keys[keys.length - 1];
+                const latestPromo = promos[latestKey];
+                const seenKey = `promo_seen_${currentClientId}_${latestKey}`;
+
+                if (latestPromo && !localStorage.getItem(seenKey)) {
+                    document.getElementById("promo-content").textContent = latestPromo.text;
+                    document.getElementById("promo-modal").style.display = "flex";
+                    localStorage.setItem(seenKey, "true");
+                }
+            });
+
+            // متابعة الشكاوى والردود الخاصة بالعميل
+            onValue(ref(db, 'complaints'), (snap) => {
+                const box = document.getElementById("client-complaints-history");
+                box.innerHTML = "";
+                if (!snap.exists()) return;
+                snap.forEach(ch => {
+                    const comp = ch.val();
+                    if (comp.clientId === currentClientId) {
                         const div = document.createElement("div");
-                        div.className = "log-item";
-                        div.innerHTML = `<span>📅 ${new Date(log.timestamp).toLocaleString('ar-EG')}</span><span>طريقة: ${log.method}</span>`;
-                        logList.appendChild(div);
-                    });
-                    document.getElementById("attendance-count").textContent = count + " مرة";
-                } else {
-                    logList.innerHTML = "<p style='color: #94a3b8; text-align: center;'>لا يوجد سجل حضور حتى الآن</p>";
-                }
+                        div.style.cssText = "background:#0a0a0a; padding:10px; border-radius:8px; margin-bottom:8px; border:1px solid #222;";
+                        div.innerHTML = `
+                            <div style="color:#fff;">📝 شكواك: ${comp.text}</div>
+                            <div style="color:var(--neon-green); font-size:0.85rem; margin-top:5px;">
+                                ${comp.reply ? `✅ رد (${comp.repliedBy || 'الإدارة'}): ${comp.reply}` : '⏳ قيد المراجعة من الإدارة...'}
+                            </div>
+                        `;
+                        box.appendChild(div);
+                    }
+                });
             });
-
-            checkGPSLocation();
         }
 
-        // التبديل بين التابات
-        window.switchTab = function(tabIndex, element) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            
-            document.getElementById('tab-' + tabIndex).classList.add('active');
-            element.classList.add('active');
-        };
-
-        // فحص الـ GPS الدقيق (نطاق الجيم الأربعة نقاط)
-        const gymPolygon = [
-            { lat: 30.480422432628437, lng: 31.180872491248486 },
-            { lat: 30.480548411175917, lng: 31.180686748283343 },
-            { lat: 30.48054263234701,  lng: 31.180560013913627 },
-            { lat: 30.480379091347345, lng: 31.180798059951982 }
-        ];
-
-        function isPointInPolygon(point, polygon) {
-            let x = point.lat, y = point.lng;
-            let inside = false;
-            for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-                let xi = polygon[i].lat, yi = polygon[i].lng;
-                let xj = polygon[j].lat, yj = polygon[j].lng;
-                let intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
-                if (intersect) inside = !inside;
-            }
-            return inside;
-        }
-
-        window.checkGPSLocation = function() {
-            const statusBadge = document.getElementById("gps-status");
-            if (!navigator.geolocation) {
-                statusBadge.textContent = "الـ GPS غير مدعوم";
-                statusBadge.className = "status-badge badge-danger";
-                return;
-            }
-
-            statusBadge.textContent = "جاري التحقق من الموقع...";
-            statusBadge.style.color = "#f59e0b";
-
-            navigator.geolocation.getCurrentPosition((position) => {
-                const userPoint = { lat: position.coords.latitude, lng: position.coords.longitude };
-                if (isPointInPolygon(userPoint, gymPolygon)) {
-                    statusBadge.textContent = "أنت داخل الجيم (تم تسجيل الحضور)";
-                    statusBadge.className = "status-badge badge-success";
-                    
-                    // تسجيل الحضور في قاعدة البيانات لليوم الحالي
-                    const todayKey = new Date().toISOString().split('T')[0];
-                    set(ref(db, 'attendance_logs/' + currentClientId + '/' + todayKey), {
-                        timestamp: new Date().toISOString(),
-                        method: 'GPS'
-                    });
-                } else {
-                    statusBadge.textContent = "أنت خارج نطاق الجيم";
-                    statusBadge.className = "status-badge badge-danger";
-                }
-            }, () => {
-                statusBadge.textContent = "فشل تحديد الموقع. تأكد من تفعيل الـ GPS";
-                statusBadge.className = "status-badge badge-danger";
-            }, { enableHighAccuracy: true });
-        };
-
-        // الشات
-        window.sendMessage = function() {
-            const input = document.getElementById("chat-input");
-            const text = input.value.trim();
-            if (!text || !currentClientId) return;
-
-            push(ref(db, 'chats/' + currentClientId), {
-                sender: 'user',
-                text: text,
-                timestamp: Date.now()
+        window.acceptTerms = function() {
+            update(ref(db, 'clients/' + currentClientId), {
+                termsAccepted: true,
+                termsAcceptedAt: new Date().toISOString()
             });
-            input.value = "";
+            document.getElementById("terms-modal").style.display = "none";
         };
 
-        // استماع للرسائل الفورية
-        // (سيتم تفعيلها تلقائياً عند جلب currentClientId في loadClientData)
+        window.closePromoModal = function() {
+            document.getElementById("promo-modal").style.display = "none";
+        };
+
+        window.switchClientTab = function(tab, btn) {
+            document.getElementById("client-tab-home").style.display = tab === 'home' ? 'block' : 'none';
+            document.getElementById("client-tab-offers").style.display = tab === 'offers' ? 'block' : 'none';
+            document.getElementById("client-tab-complaints").style.display = tab === 'complaints' ? 'block' : 'none';
+            if (btn) {
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            }
+        };
+
+        window.sendComplaint = function() {
+            const txt = document.getElementById("complaint-text").value.trim();
+            if (!txt) return alert("اكتب نص الشكوى أولاً");
+            push(ref(db, 'complaints'), {
+                clientId: currentClientId,
+                clientName: currentClientData?.name || "عميل",
+                clientPhone: currentClientData?.phone || "",
+                text: txt,
+                status: 'unread',
+                timestamp: new Date().toISOString()
+            }).then(() => {
+                document.getElementById("complaint-text").value = "";
+                alert("تم إرسال شكواك للإدارة بنجاح");
+            });
+        };
+
+        window.logoutClient = function() {
+            localStorage.removeItem("hpg_client_id");
+            location.reload();
+        };
     </script>
 </body>
 </html>
