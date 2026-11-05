@@ -141,7 +141,7 @@
 
     <div class="app-topbar" id="app-topbar">
         <div class="logo-title">
-            <img src="HanyLogo.JPG" alt="Logo" onerror="this.style.display='none'">
+            <img src="HanyLogo.jpg" alt="Logo" onerror="if(!this.dataset.tried){this.dataset.tried='1';this.src='HanyLogo.JPG';}else if(this.dataset.tried==='1'){this.dataset.tried='2';this.src='hanylogo.jpg';}else{this.style.display='none';}">
             <span>HANY POWER GYM</span>
         </div>
         <button class="wa-header-btn" onclick="contactAdminWhatsApp()">
@@ -161,7 +161,7 @@
     <!-- 1. شاشة البداية -->
     <div id="splash-screen">
         <div class="splash-img-box">
-            <img src="HanyLogo.JPG" alt="Hany Power GYM" onerror="this.style.display='none'">
+            <img src="HanyLogo.jpg" alt="Hany Power GYM" onerror="if(!this.dataset.tried){this.dataset.tried='1';this.src='HanyLogo.JPG';}else if(this.dataset.tried==='1'){this.dataset.tried='2';this.src='hanylogo.jpg';}else{this.style.display='none';}">
         </div>
         <div class="loading-area">
             <div class="progress-text" id="progress-text">0%</div>
@@ -172,34 +172,35 @@
             <div id="welcome-area"></div>
         </div>
         <div class="link-global-footer">
-            <img src="Link.png" alt="Link Logo" onerror="this.style.display='none'">
+            <img src="Link.png" alt="Link Logo" onerror="if(!this.dataset.tried){this.dataset.tried='1';this.src='link.png';}else{this.style.display='none';}">
             <div class="footer-txt">جميع الحقوق محفوظة شركة <span>Link</span> للبرمجة والتطوير - <span>Muhamed Elhamalawy</span></div>
         </div>
     </div>
 
-    <!-- 2. شاشة تسجيل الدخول العادية -->
+    <!-- 2. شاشة تسجيل الدخول الموحدة والذكية -->
     <div id="login-screen" class="screen">
         <div class="card">
             <h2 class="title-green">تسجيل الدخول</h2>
-            <input type="tel" id="login-phone" placeholder="رقم الموبايل">
-            <input type="password" id="login-pass" placeholder="كلمة المرور">
-            <button class="btn-green" onclick="loginClient()">دخول</button>
-            <span class="link-green" onclick="showScreen('register-screen')">تسجيل عميل جديد (إرسال طلب للإدارة)</span>
-        </div>
-    </div>
-
-    <!-- 3. شاشة إعداد الحساب لأول مرة (رقم الموبايل المسجل من الريسيبشن + تعيين باسورد وصورة) -->
-    <div id="first-setup-screen" class="screen">
-        <div class="card">
-            <h2 class="title-green">إعداد حسابك الجديد</h2>
-            <p style="color:var(--silver); font-size:0.9rem; text-align:center; margin-bottom:15px;">أهلاً بك! تم تسطير اشتراكك من الريسيبشن. يجيب إدخال رقم موبايلك المسجل لإنشاء كلمة المرور وصورتك الشخصية:</p>
             
-            <input type="tel" id="setup-phone" placeholder="رقم الموبايل المسجل">
-            <button class="btn-green" onclick="verifyPhoneForFirstSetup()">التحقق من الرقم</button>
+            <!-- خطوة إدخال رقم الهاتف أولاً -->
+            <div id="step-phone-box">
+                <input type="tel" id="login-phone" placeholder="أدخل رقم الموبايل المسجل" oninput="resetLoginStep()">
+                <button class="btn-green" id="btn-check-phone" onclick="checkPhoneStatus()">متابعة</button>
+            </div>
 
-            <div id="setup-details-box" style="display:none; margin-top:15px;">
+            <!-- الحالة 1: العميل له باسورد سابق (يظهر حقل الباسورد فقط) -->
+            <div id="existing-pass-box" style="display:none; margin-top:12px;">
+                <input type="password" id="login-pass" placeholder="أدخل كلمة المرور">
+                <button class="btn-green" onclick="loginWithPassword()">دخول</button>
+            </div>
+
+            <!-- الحالة 2: العميل يدخل لأول مرة بعد تسجيله في الريسيبشن (يظهر إنشاء باسورد + صورة) -->
+            <div id="first-time-setup-box" style="display:none; margin-top:12px; border-top:1px solid #262626; padding-top:15px;">
+                <p style="color:var(--neon-green); font-size:0.95rem; text-align:center; margin-bottom:12px; font-weight:bold;">
+                    مرحباً بك يا كابتن <span id="first-time-client-name"></span>! هذا أول دخول لك، يرجى تعيين كلمة مرور جديدة والتقاط صورتك للكارنيه:
+                </p>
                 <input type="password" id="setup-pass1" placeholder="كلمة المرور الجديدة">
-                <input type="password" id="setup-pass2" placeholder="تأكيد كلمة المرور">
+                <input type="password" id="setup-pass2" placeholder="تأكيد كلمة المرور الجديدة">
                 
                 <div class="photo-picker-box">
                     <p style="color:var(--neon-green); font-weight:bold; margin-bottom:10px;">الصورة الشخصية للكارنيه</p>
@@ -214,11 +215,11 @@
                 <button class="btn-green" onclick="completeFirstSetup()">حفظ ودخول التطبيق</button>
             </div>
 
-            <span class="link-green" onclick="showScreen('login-screen')">رجوع لتسجيل الدخول</span>
+            <span class="link-green" onclick="showScreen('register-screen')">عميل جديد؟ إرسال طلب اشتراك للإدارة</span>
         </div>
     </div>
 
-    <!-- 4. شاشة تسجيل طلب عميل جديد عبر الواتساب أو الإيميل للإدارة -->
+    <!-- 3. شاشة إرسال طلب عميل جديد عبر الواتساب للإدارة -->
     <div id="register-screen" class="screen">
         <div class="card">
             <h2 class="title-green">طلب اشتراك جديد</h2>
@@ -236,12 +237,12 @@
             <label style="color:var(--silver); font-size:0.9rem; display:block; margin-bottom:6px;">اختر الباقة:</label>
             <select id="reg-package"></select>
             
-            <button class="btn-green" style="margin-bottom:10px;" onclick="sendRegistrationRequest('whatsapp')">إرسال الطلب عبر واتساب</button>
-            <span class="link-green" onclick="showScreen('login-screen')">رجوع</span>
+            <button class="btn-green" style="margin-bottom:10px;" onclick="sendRegistrationRequest()">إرسال الطلب عبر واتساب</button>
+            <span class="link-green" onclick="showScreen('login-screen')">رجوع لتسجيل الدخول</span>
         </div>
     </div>
 
-    <!-- 5. الشاشة الرئيسية للعميل -->
+    <!-- 4. الشاشة الرئيسية للعميل -->
     <div id="main-screen" class="screen">
         <div id="client-tab-home">
             <div class="client-header">
@@ -295,7 +296,7 @@
     </div>
 
     <footer class="link-global-footer">
-        <img src="Link.png" alt="Link Logo" onerror="this.style.display='none'">
+        <img src="Link.png" alt="Link Logo" onerror="if(!this.dataset.tried){this.dataset.tried='1';this.src='link.png';}else{this.style.display='none';}">
         <div class="footer-txt">جميع الحقوق محفوظة شركة <span>Link</span> للبرمجة والتطوير - <span>Muhamed Elhamalawy</span></div>
     </footer>
 
@@ -319,7 +320,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, get, set, push, update, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, get, push, update, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB7uyPEK300Wt97PALGgAqezHH7-ddv6jA",
@@ -339,7 +340,8 @@
         let activePackages = {};
         let currentClientId = localStorage.getItem("hpg_client_id");
         let currentClientData = null;
-        let setupTargetClientId = null;
+        let matchedClientId = null;
+        let matchedClientRecord = null;
         let selectedPhotoBase64 = "";
 
         function formatEgyptPhone(rawPhone) {
@@ -402,59 +404,77 @@
                         return;
                     }
                 }
-                welcomeArea.innerHTML = `
-                    <button class="btn-green" onclick="startLoginFlow()" style="margin-bottom:8px;">تسجيل دخول</button>
-                    <button class="btn-outline" onclick="showFirstSetupScreen()" style="margin:0; border-color:var(--neon-green); color:var(--neon-green);">أول مرة افتح التطبيق (إعداد الحساب)</button>
-                `;
+                // زر واحد فقط لتسجيل الدخول
+                welcomeArea.innerHTML = `<button class="btn-green" onclick="startLoginFlow()">تسجيل دخول</button>`;
             }
         }, 100);
 
         window.startLoginFlow = function() {
             document.getElementById("splash-screen").style.display = "none";
+            resetLoginStep();
+            document.getElementById("login-phone").value = "";
             showScreen('login-screen');
         };
 
-        window.showFirstSetupScreen = function() {
-            document.getElementById("splash-screen").style.display = "none";
-            document.getElementById("setup-phone").value = "";
-            document.getElementById("setup-details-box").style.display = "none";
-            document.getElementById("client-photo-preview").style.display = "none";
+        window.resetLoginStep = function() {
+            matchedClientId = null;
+            matchedClientRecord = null;
             selectedPhotoBase64 = "";
-            showScreen('first-setup-screen');
+            document.getElementById("btn-check-phone").style.display = "block";
+            document.getElementById("existing-pass-box").style.display = "none";
+            document.getElementById("first-time-setup-box").style.display = "none";
+            document.getElementById("login-pass").value = "";
+            document.getElementById("setup-pass1").value = "";
+            document.getElementById("setup-pass2").value = "";
+            document.getElementById("client-photo-preview").style.display = "none";
         };
 
-        window.showScreen = function(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            if (id === 'register-screen') {
-                document.getElementById("reg-name").value = "";
-                document.getElementById("reg-phone").value = "";
-                document.getElementById("reg-email").value = "";
-                document.getElementById("reg-address").value = "";
-                document.getElementById("reg-age").value = "";
-            }
-        };
-
-        // التحقق من رقم الموبايل للعميل المسجل مسبقاً من الريسيبشن لأول مرة
-        window.verifyPhoneForFirstSetup = async function() {
-            const phone = document.getElementById("setup-phone").value.trim();
-            if (!phone) return alert("أدخل رقم الموبايل المسجل");
+        // فحص رقم الموبايل تلقائياً وتحديد هل هو دخول لأول مرة أم لديه باسورد
+        window.checkPhoneStatus = async function() {
+            const phone = document.getElementById("login-phone").value.trim();
+            if (!phone) return alert("يرجى إدخال رقم الموبايل أولاً");
 
             const snap = await get(ref(db, 'clients'));
-            if (!snap.exists()) return alert("رقم الهاتف غير مسجل من الريسيبشن بعد!");
+            if (!snap.exists()) return alert("رقم الموبايل غير مسجل بالنظام، يرجى التواصل مع الريسيبشن أو إرسال طلب اشتراك جديد.");
 
             let foundId = null;
+            let foundData = null;
             snap.forEach(child => {
                 const c = child.val();
-                if (c.phone === phone && (!c.password || c.isActivated === false)) {
+                if (String(c.phone).trim() === phone) {
                     foundId = child.key;
+                    foundData = c;
                 }
             });
 
-            if (!foundId) return alert("رقم الهاتف غير مسجل في النظام أو تم تفعيله مسبقاً! قم بتسجيل الدخول مباشرة.");
+            if (!foundId) {
+                return alert("رقم الموبايل غير مسجل في الجيم! تواصل مع الريسيبشن لتسجيل اشتراكك أولاً.");
+            }
 
-            setupTargetClientId = foundId;
-            document.getElementById("setup-details-box").style.display = "block";
+            matchedClientId = foundId;
+            matchedClientRecord = foundData;
+            document.getElementById("btn-check-phone").style.display = "none";
+
+            // إذا كان يدخل لأول مرة (ليس لديه باسورد بعد)
+            if (!foundData.password || foundData.isActivated === false) {
+                document.getElementById("first-time-client-name").textContent = foundData.name || "";
+                document.getElementById("first-time-setup-box").style.display = "block";
+            } else {
+                // إذا كان مسجلاً من قبل ولديه باسورد
+                document.getElementById("existing-pass-box").style.display = "block";
+                document.getElementById("login-pass").focus();
+            }
+        };
+
+        window.loginWithPassword = function() {
+            const pass = document.getElementById("login-pass").value.trim();
+            if (!pass) return alert("أدخل كلمة المرور");
+            if (!matchedClientRecord || matchedClientRecord.password !== pass) {
+                return alert("كلمة المرور غير صحيحة!");
+            }
+            currentClientId = matchedClientId;
+            localStorage.setItem("hpg_client_id", matchedClientId);
+            openClientMainApp();
         };
 
         window.handleImageSelect = function(event) {
@@ -491,36 +511,27 @@
             if (pass1 !== pass2) return alert("كلمتا المرور غير متطابقتين!");
             if (!selectedPhotoBase64) return alert("يرجى التقاط أو اختيار صورة شخصية للكارنيه");
 
-            await update(ref(db, 'clients/' + setupTargetClientId), {
+            await update(ref(db, 'clients/' + matchedClientId), {
                 password: pass1,
                 photo: selectedPhotoBase64,
                 isActivated: true
             });
 
-            currentClientId = setupTargetClientId;
-            localStorage.setItem("hpg_client_id", setupTargetClientId);
+            currentClientId = matchedClientId;
+            localStorage.setItem("hpg_client_id", matchedClientId);
             openClientMainApp();
         };
 
-        window.loginClient = async function() {
-            const phone = document.getElementById("login-phone").value.trim();
-            const pass = document.getElementById("login-pass").value.trim();
-            if (!phone || !pass) return alert("أدخل رقم الموبايل وكلمة المرور");
-
-            const snap = await get(ref(db, 'clients'));
-            if (!snap.exists()) return alert("لا توجد حسابات مسجلة");
-
-            let foundId = null;
-            snap.forEach(child => {
-                const c = child.val();
-                if (c.phone === phone && c.password === pass) foundId = child.key;
-            });
-
-            if (!foundId) return alert("بيانات الدخول غير صحيحة!");
-
-            currentClientId = foundId;
-            localStorage.setItem("hpg_client_id", foundId);
-            openClientMainApp();
+        window.showScreen = function(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if (id === 'register-screen') {
+                document.getElementById("reg-name").value = "";
+                document.getElementById("reg-phone").value = "";
+                document.getElementById("reg-email").value = "";
+                document.getElementById("reg-address").value = "";
+                document.getElementById("reg-age").value = "";
+            }
         };
 
         function renderPackagesDropdownAndOffers() {
@@ -561,7 +572,7 @@
             });
         }
 
-        window.sendRegistrationRequest = async function(method) {
+        window.sendRegistrationRequest = async function() {
             const name = document.getElementById("reg-name").value.trim();
             const phone = document.getElementById("reg-phone").value.trim();
             const email = document.getElementById("reg-email").value.trim();
@@ -573,7 +584,7 @@
 
             if (!name || !phone || !age) return alert("يرجى ملء الاسم، رقم التليفون، والسن");
 
-            const structuredMsg = `طلب اشتراك جديد Hany Power GYM:\nالاسم: ${name}\nالهاتف: ${phone}\nالإيميل: ${email || 'غير محدد'}\nالعنوان: ${address || 'غير محدد'}\nالنوع: ${gender}\nالسن: ${age}\nالباقة: ${pkg.name}\nالسعر: ${pkg.price}`;
+            const structuredMsg = `طلب اشتراك جديد Hany Power GYM:\nالاسم: ${name}\nالهاتف: ${phone}\nالإيميل: ${email || 'غير محدد'}\nالعنوان: ${address || 'غير محدد'}\nالنوع: ${gender}\nالسن: ${age}\nالباقة: ${pkg.name}\nكود_الباقة: ${pkgId}\nالسعر: ${pkg.price}`;
 
             openDirectWhatsApp(gymSettings.whatsapp, structuredMsg);
         };
@@ -730,8 +741,8 @@
             currentClientId = null;
             currentClientData = null;
             document.getElementById("client-top-tabs").style.display = "none";
+            resetLoginStep();
             document.getElementById("login-phone").value = "";
-            document.getElementById("login-pass").value = "";
             showScreen('login-screen');
         };
     </script>
