@@ -20,7 +20,6 @@
             overflow-x: hidden; display: flex; flex-direction: column; justify-content: space-between;
         }
 
-        /* الشريط العلوي */
         .app-topbar {
             width: 100%; background: #000; border-bottom: 2px solid var(--neon-green);
             padding: 12px 20px; display: none; justify-content: space-between; align-items: center;
@@ -37,11 +36,10 @@
         }
         .wa-header-btn svg { width: 20px; height: 20px; fill: #fff; }
 
-        /* شاشة البداية (5 ثواني) */
         #splash-screen {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #000; z-index: 10000; display: flex; flex-direction: column;
-            justify-content: space-between; align-items: center; padding: 20px 20px 10px 20px;
+            justify-content: space-between; align-items: center; padding: 20px;
         }
         .splash-img-box { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; }
         .splash-img-box img { width: 100%; max-width: 390px; max-height: 62vh; object-fit: contain; filter: drop-shadow(0 0 25px rgba(27,225,27,0.5)); }
@@ -53,7 +51,6 @@
         .welcome-msg { font-size: 1.4rem; font-weight: bold; color: #fff; }
         .welcome-msg span { color: var(--neon-green); }
 
-        /* الأزرار والمدخلات */
         .btn-green {
             background: linear-gradient(135deg, #109c10, var(--neon-green)); color: #000; font-weight: 800;
             border: none; padding: 14px 24px; border-radius: 10px; cursor: pointer; font-size: 1.05rem;
@@ -66,14 +63,12 @@
         }
         input:focus, select:focus, textarea:focus { border-color: var(--neon-green); box-shadow: 0 0 8px rgba(27,225,27,0.3); }
 
-        /* الشاشات */
         .screen { display: none; width: 100vw; flex: 1; padding: 20px; }
         .screen.active { display: block; }
         .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 15px; padding: 20px; margin-bottom: 15px; width: 100%; box-shadow: 0 4px 20px rgba(0,0,0,0.6); }
         .title-green { color: var(--neon-green); text-align: center; margin-bottom: 15px; font-size: 1.4rem; }
         .link-green { color: var(--neon-green); text-align: center; display: block; margin-top: 15px; cursor: pointer; font-weight: bold; text-decoration: underline; }
 
-        /* التقاط الصورة الشخصية */
         .photo-picker-box {
             text-align: center; margin: 15px 0; padding: 15px; background: #0a0a0a;
             border: 1px dashed var(--neon-green); border-radius: 12px;
@@ -85,7 +80,6 @@
         }
         .photo-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-        /* الشاشة الرئيسية للعميل */
         .client-header { text-align: center; padding: 18px; border-bottom: 2px solid var(--neon-green); margin-bottom: 15px; background: var(--card-bg); border-radius: 15px; width: 100%; }
         .client-avatar { width: 75px; height: 75px; border-radius: 50%; object-fit: cover; border: 2px solid var(--neon-green); margin-bottom: 8px; display: none; margin-left: auto; margin-right: auto; }
         .client-header h2 { font-size: 1.7rem; color: #fff; margin-bottom: 6px; }
@@ -118,13 +112,11 @@
         .offer-item { background: #181818; border-right: 4px solid var(--neon-green); padding: 14px; border-radius: 8px; margin-bottom: 10px; cursor: pointer; }
         .offer-details { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid #333; color: var(--silver); font-size: 0.95rem; line-height: 1.6; }
 
-        /* شريط التابات العلوي (تحت الهيدر مباشرة) */
         .top-tabs-nav { width: 100%; background: #0a0a0a; border-bottom: 1px solid var(--border-color); display: none; z-index: 890; position: sticky; top: 61px; }
         .top-tabs-container { display: flex; width: 100%; }
         .nav-btn { flex: 1; padding: 12px 0; text-align: center; color: var(--silver); cursor: pointer; font-weight: bold; font-size: 0.95rem; }
         .nav-btn.active { color: var(--neon-green); border-bottom: 3px solid var(--neon-green); background: #111; }
 
-        /* فوتر حقوق شركة Link الثابت أسفل الصفحة */
         .link-global-footer {
             width: 100%; background: #080b10; border-top: 1px solid #262c36;
             padding: 10px 15px; display: flex; align-items: center; justify-content: center;
@@ -147,10 +139,9 @@
 </head>
 <body>
 
-    <!-- الشريط العلوي -->
     <div class="app-topbar" id="app-topbar">
         <div class="logo-title">
-            <img src="HanyLogo.jpg" alt="Logo" onerror="this.style.display='none'">
+            <img src="HanyLogo.JPG" alt="Logo" onerror="this.style.display='none'">
             <span>HANY POWER GYM</span>
         </div>
         <button class="wa-header-btn" onclick="contactAdminWhatsApp()">
@@ -159,7 +150,6 @@
         </button>
     </div>
 
-    <!-- شريط التابات العلوي (تحت الهيدر) -->
     <div class="top-tabs-nav" id="client-top-tabs">
         <div class="top-tabs-container">
             <div class="nav-btn active" id="nav-btn-home" onclick="switchClientTab('home', this)">الرئيسية</div>
@@ -168,10 +158,10 @@
         </div>
     </div>
 
-    <!-- 1. شاشة البداية (5 ثواني) -->
+    <!-- 1. شاشة البداية -->
     <div id="splash-screen">
         <div class="splash-img-box">
-            <img src="HanyLogo.jpg" alt="Hany Power GYM" onerror="this.style.display='none'">
+            <img src="HanyLogo.JPG" alt="Hany Power GYM" onerror="this.style.display='none'">
         </div>
         <div class="loading-area">
             <div class="progress-text" id="progress-text">0%</div>
@@ -183,26 +173,55 @@
         </div>
         <div class="link-global-footer">
             <img src="Link.png" alt="Link Logo" onerror="this.style.display='none'">
-            <div class="footer-txt">جميع الحقوق محفوظة شركة <span>Link</span> للبرمجة والتطوير - <span>Muhamed Elhamalawy</span>[cite: 2]</div>
+            <div class="footer-txt">جميع الحقوق محفوظة شركة <span>Link</span> للبرمجة والتطوير - <span>Muhamed Elhamalawy</span></div>
         </div>
     </div>
 
-    <!-- 2. شاشة تسجيل الدخول -->
+    <!-- 2. شاشة تسجيل الدخول العادية -->
     <div id="login-screen" class="screen">
         <div class="card">
             <h2 class="title-green">تسجيل الدخول</h2>
             <input type="tel" id="login-phone" placeholder="رقم الموبايل">
             <input type="password" id="login-pass" placeholder="كلمة المرور">
             <button class="btn-green" onclick="loginClient()">دخول</button>
-            <span class="link-green" onclick="showScreen('register-screen')">تسجيل عميل جديد</span>
-            <span class="link-green" style="font-size:0.9rem; color:#9ca3af;" onclick="openActivationScreen()">تفعيل حساب جديد بكود التفعيل</span>
+            <span class="link-green" onclick="showScreen('register-screen')">تسجيل عميل جديد (إرسال طلب للإدارة)</span>
         </div>
     </div>
 
-    <!-- 3. شاشة تسجيل عميل جديد (مع تفريغ البيانات القديمة تماماً) -->
+    <!-- 3. شاشة إعداد الحساب لأول مرة (رقم الموبايل المسجل من الريسيبشن + تعيين باسورد وصورة) -->
+    <div id="first-setup-screen" class="screen">
+        <div class="card">
+            <h2 class="title-green">إعداد حسابك الجديد</h2>
+            <p style="color:var(--silver); font-size:0.9rem; text-align:center; margin-bottom:15px;">أهلاً بك! تم تسطير اشتراكك من الريسيبشن. يجيب إدخال رقم موبايلك المسجل لإنشاء كلمة المرور وصورتك الشخصية:</p>
+            
+            <input type="tel" id="setup-phone" placeholder="رقم الموبايل المسجل">
+            <button class="btn-green" onclick="verifyPhoneForFirstSetup()">التحقق من الرقم</button>
+
+            <div id="setup-details-box" style="display:none; margin-top:15px;">
+                <input type="password" id="setup-pass1" placeholder="كلمة المرور الجديدة">
+                <input type="password" id="setup-pass2" placeholder="تأكيد كلمة المرور">
+                
+                <div class="photo-picker-box">
+                    <p style="color:var(--neon-green); font-weight:bold; margin-bottom:10px;">الصورة الشخصية للكارنيه</p>
+                    <img id="client-photo-preview" class="photo-preview" alt="Preview">
+                    <input type="file" id="camera-input" accept="image/*" capture="user" style="display:none;" onchange="handleImageSelect(event)">
+                    <input type="file" id="gallery-input" accept="image/*" style="display:none;" onchange="handleImageSelect(event)">
+                    <div class="photo-btns">
+                        <button type="button" class="btn-outline" style="margin:0;" onclick="document.getElementById('camera-input').click()">📷 الكاميرا</button>
+                        <button type="button" class="btn-outline" style="margin:0;" onclick="document.getElementById('gallery-input').click()">🖼️ الاستوديو</button>
+                    </div>
+                </div>
+                <button class="btn-green" onclick="completeFirstSetup()">حفظ ودخول التطبيق</button>
+            </div>
+
+            <span class="link-green" onclick="showScreen('login-screen')">رجوع لتسجيل الدخول</span>
+        </div>
+    </div>
+
+    <!-- 4. شاشة تسجيل طلب عميل جديد عبر الواتساب أو الإيميل للإدارة -->
     <div id="register-screen" class="screen">
         <div class="card">
-            <h2 class="title-green">تسجيل عميل جديد</h2>
+            <h2 class="title-green">طلب اشتراك جديد</h2>
             <input type="text" id="reg-name" placeholder="الاسم بالكامل">
             <input type="tel" id="reg-phone" placeholder="رقم التليفون (واتساب)">
             <input type="email" id="reg-email" placeholder="البريد الإلكتروني (اختياري)">
@@ -217,44 +236,7 @@
             <label style="color:var(--silver); font-size:0.9rem; display:block; margin-bottom:6px;">اختر الباقة:</label>
             <select id="reg-package"></select>
             
-            <button class="btn-green" style="margin-bottom:10px;" onclick="sendRegistrationRequest('whatsapp')">إرسال عبر واتساب</button>
-            <button class="btn-outline" onclick="sendRegistrationRequest('email')">إرسال عبر الإيميل</button>
-            <span class="link-green" onclick="showScreen('login-screen')">رجوع</span>
-        </div>
-    </div>
-
-    <!-- 4. شاشة التفعيل (الاستخراج الذكي لكود التفعيل) -->
-    <div id="activate-screen" class="screen">
-        <div class="card">
-            <h2 class="title-green">تفعيل الحساب</h2>
-            <p id="work-hours-note" style="color:var(--silver); font-size:0.9rem; text-align:center; margin-bottom:15px;"></p>
-
-            <!-- الخطوة الأولى: إدخال الكود (يتم تنقيحه واستخراج الكود الصافي ذكياً) -->
-            <div id="act-step-1">
-                <input type="tel" id="act-phone" placeholder="رقم الموبايل المسجل">
-                <input type="text" id="act-code" placeholder="الصق رسالة كود التفعيل هنا..." oninput="autoCleanActivationCode(this)">
-                <button class="btn-green" onclick="verifyActivationCodeStep()">تحقق من الكود</button>
-            </div>
-
-            <!-- الخطوة الثانية: كلمة المرور والصورة الشخصية لأول مرة -->
-            <div id="act-step-2" style="display:none;">
-                <input type="password" id="act-pass1" placeholder="كلمة المرور الجديدة">
-                <input type="password" id="act-pass2" placeholder="تأكيد كلمة المرور الجديدة">
-                
-                <div class="photo-picker-box">
-                    <p style="color:var(--neon-green); font-weight:bold; margin-bottom:10px;">الصورة الشخصية للكارنيه</p>
-                    <img id="client-photo-preview" class="photo-preview" alt="Preview">
-                    <input type="file" id="camera-input" accept="image/*" capture="user" style="display:none;" onchange="handleImageSelect(event)">
-                    <input type="file" id="gallery-input" accept="image/*" style="display:none;" onchange="handleImageSelect(event)">
-                    <div class="photo-btns">
-                        <button type="button" class="btn-outline" style="margin:0;" onclick="document.getElementById('camera-input').click()">📷 الكاميرا</button>
-                        <button type="button" class="btn-outline" style="margin:0;" onclick="document.getElementById('gallery-input').click()">🖼️ الاستوديو</button>
-                    </div>
-                </div>
-
-                <button class="btn-green" onclick="completeFirstSetup()">حفظ ودخول</button>
-            </div>
-
+            <button class="btn-green" style="margin-bottom:10px;" onclick="sendRegistrationRequest('whatsapp')">إرسال الطلب عبر واتساب</button>
             <span class="link-green" onclick="showScreen('login-screen')">رجوع</span>
         </div>
     </div>
@@ -312,10 +294,9 @@
         </div>
     </div>
 
-    <!-- الفوتر العام الثابت في أسفل التطبيق -->
     <footer class="link-global-footer">
         <img src="Link.png" alt="Link Logo" onerror="this.style.display='none'">
-        <div class="footer-txt">جميع الحقوق محفوظة شركة <span>Link</span> للبرمجة والتطوير - <span>Muhamed Elhamalawy</span>[cite: 2]</div>
+        <div class="footer-txt">جميع الحقوق محفوظة شركة <span>Link</span> للبرمجة والتطوير - <span>Muhamed Elhamalawy</span></div>
     </footer>
 
     <!-- نافذة الشروط والأحكام -->
@@ -327,7 +308,7 @@
         </div>
     </div>
 
-    <!-- نافذة الرسائل الترويجية -->
+    <!-- نافذة الإشعارات -->
     <div class="modal-overlay" id="promo-modal">
         <div class="modal-box" style="text-align:center;">
             <h3 class="title-green">إشعار</h3>
@@ -358,7 +339,7 @@
         let activePackages = {};
         let currentClientId = localStorage.getItem("hpg_client_id");
         let currentClientData = null;
-        let verifiedTargetClientId = null;
+        let setupTargetClientId = null;
         let selectedPhotoBase64 = "";
 
         function formatEgyptPhone(rawPhone) {
@@ -374,7 +355,6 @@
             window.location.href = `whatsapp://send?phone=${egPhone}&text=${encodeURIComponent(textMsg)}`;
         }
 
-        // إرسال رسالة واتساب للإدارة مع تضمين اسم ورقم العميل تلقائياً
         window.contactAdminWhatsApp = function() {
             const cName = currentClientData?.name || document.getElementById("reg-name")?.value.trim() || "عميل جديد";
             const cPhone = currentClientData?.phone || document.getElementById("login-phone")?.value.trim() || document.getElementById("reg-phone")?.value.trim() || "غير محدد";
@@ -391,7 +371,6 @@
             renderPackagesDropdownAndOffers();
         });
 
-        // شاشة البداية 5 ثواني
         let progress = 0;
         const bar = document.getElementById("progress-bar");
         const txt = document.getElementById("progress-text");
@@ -423,7 +402,10 @@
                         return;
                     }
                 }
-                welcomeArea.innerHTML = `<button class="btn-green" onclick="startLoginFlow()">تسجيل دخول</button>`;
+                welcomeArea.innerHTML = `
+                    <button class="btn-green" onclick="startLoginFlow()" style="margin-bottom:8px;">تسجيل دخول</button>
+                    <button class="btn-outline" onclick="showFirstSetupScreen()" style="margin:0; border-color:var(--neon-green); color:var(--neon-green);">أول مرة افتح التطبيق (إعداد الحساب)</button>
+                `;
             }
         }, 100);
 
@@ -432,13 +414,19 @@
             showScreen('login-screen');
         };
 
+        window.showFirstSetupScreen = function() {
+            document.getElementById("splash-screen").style.display = "none";
+            document.getElementById("setup-phone").value = "";
+            document.getElementById("setup-details-box").style.display = "none";
+            document.getElementById("client-photo-preview").style.display = "none";
+            selectedPhotoBase64 = "";
+            showScreen('first-setup-screen');
+        };
+
         window.showScreen = function(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            if (id === 'activate-screen') {
-                document.getElementById("work-hours-note").textContent = `انتظر إدارة الجيم ستتواصل معك خلال دقائق في أوقات العمل الرسمية (${gymSettings.workDays || 'يومياً'})`;
-            } else if (id === 'register-screen') {
-                // مسح وتفريغ البيانات القديمة عند الدخول لتسجيل عميل جديد
+            if (id === 'register-screen') {
                 document.getElementById("reg-name").value = "";
                 document.getElementById("reg-phone").value = "";
                 document.getElementById("reg-email").value = "";
@@ -447,124 +435,26 @@
             }
         };
 
-        window.openActivationScreen = function() {
-            verifiedTargetClientId = null;
-            selectedPhotoBase64 = "";
-            document.getElementById("act-phone").value = "";
-            document.getElementById("act-code").value = "";
-            document.getElementById("act-pass1").value = "";
-            document.getElementById("act-pass2").value = "";
-            document.getElementById("act-step-1").style.display = "block";
-            document.getElementById("act-step-2").style.display = "none";
-            document.getElementById("client-photo-preview").style.display = "none";
-            showScreen('activate-screen');
-        };
-
-        // استخراج كود التفعيل ذكياً وتجاهل الكلمات الزائدة عند لصق الرسالة كاملة
-        window.autoCleanActivationCode = function(inputEl) {
-            let val = inputEl.value;
-            // البحث عن نمط كود مثل HPG يليه أرقام أو حروف إنجليزية مسطرة
-            const match = val.match(/HPG[a-zA-Z0-9]+/i) || val.match(/[A-Z0-9]{6,10}/);
-            if (match) {
-                inputEl.value = match[0].toUpperCase();
-            }
-        };
-
-        function renderPackagesDropdownAndOffers() {
-            const sel = document.getElementById("reg-package");
-            const offersBox = document.getElementById("offers-list-container");
-            sel.innerHTML = "";
-            offersBox.innerHTML = "";
-
-            Object.entries(activePackages).forEach(([id, pkg]) => {
-                if (pkg.active !== false) {
-                    const typeDesc = pkg.type === 'sessions'
-                        ? `${pkg.sessions} سيشن (${pkg.validityMode === 'with_expiry' ? pkg.durationDays + ' يوم' : 'مفتوح'})`
-                        : `${pkg.durationDays} يوم`;
-
-                    const opt = document.createElement("option");
-                    opt.value = id;
-                    opt.textContent = `${pkg.name} - ${typeDesc} - ${pkg.price} ج.م`;
-                    sel.appendChild(opt);
-
-                    const offerDiv = document.createElement("div");
-                    offerDiv.className = "offer-item";
-                    offerDiv.innerHTML = `
-                        <div style="display:flex; justify-content:space-between; font-weight:bold; color:var(--neon-green); font-size:1.05rem;">
-                            <span>${pkg.name}</span>
-                            <span>${pkg.price} ج.م</span>
-                        </div>
-                        <div class="offer-details">
-                            <p>المدة / السيشن: ${typeDesc}</p>
-                            <p>الدعوات: ${pkg.invitations || 0}</p>
-                            <p>الاستخدام: ${pkg.sharable ? 'قابل للتوزيع' : 'شخصي فقط'}</p>
-                            <p>الصلاحية: ${pkg.expiryDate || 'ساري'}</p>
-                        </div>
-                    `;
-                    offerDiv.onclick = () => {
-                        const det = offerDiv.querySelector('.offer-details');
-                        det.style.display = det.style.display === 'block' ? 'none' : 'block';
-                    };
-                    offersBox.appendChild(offerDiv);
-                }
-            });
-        }
-
-        window.sendRegistrationRequest = async function(method) {
-            const name = document.getElementById("reg-name").value.trim();
-            const phone = document.getElementById("reg-phone").value.trim();
-            const email = document.getElementById("reg-email").value.trim();
-            const address = document.getElementById("reg-address").value.trim();
-            const gender = document.getElementById("reg-gender").value;
-            const age = document.getElementById("reg-age").value.trim();
-            const pkgId = document.getElementById("reg-package").value;
-            const pkg = activePackages[pkgId] || { name: "باقة عامة", price: 0 };
-
-            if (!name || !phone || !age) return alert("يرجى ملء الاسم، رقم التليفون، والسن");
+        // التحقق من رقم الموبايل للعميل المسجل مسبقاً من الريسيبشن لأول مرة
+        window.verifyPhoneForFirstSetup = async function() {
+            const phone = document.getElementById("setup-phone").value.trim();
+            if (!phone) return alert("أدخل رقم الموبايل المسجل");
 
             const snap = await get(ref(db, 'clients'));
-            if (snap.exists()) {
-                let phoneExists = false;
-                snap.forEach(ch => { if (ch.val().phone === phone) phoneExists = true; });
-                if (phoneExists) return alert("رقم الهاتف مسجل بالفعل لعميل آخر!");
-            }
+            if (!snap.exists()) return alert("رقم الهاتف غير مسجل من الريسيبشن بعد!");
 
-            const structuredMsg = `طلب اشتراك Hany Power GYM:\nالاسم: ${name}\nالهاتف: ${phone}\nالإيميل: ${email || 'غير محدد'}\nالعنوان: ${address || 'غير محدد'}\nالنوع: ${gender}\nالسن: ${age}\nالباقة: ${pkg.name}\nكود_الباقة: ${pkgId}\nالسعر: ${pkg.price}`;
-
-            openActivationScreen();
-            document.getElementById("act-phone").value = phone;
-
-            if (method === 'whatsapp') {
-                openDirectWhatsApp(gymSettings.whatsapp, structuredMsg);
-            } else {
-                window.location.href = `mailto:${gymSettings.email || ''}?subject=${encodeURIComponent('طلب اشتراك - ' + name)}&body=${encodeURIComponent(structuredMsg)}`;
-            }
-        };
-
-        window.verifyActivationCodeStep = async function() {
-            const phone = document.getElementById("act-phone").value.trim();
-            let rawCode = document.getElementById("act-code").value.trim();
-            if (!phone || !rawCode) return alert("أدخل رقم الموبايل وكود التفعيل");
-
-            const cleanCode = rawCode.replace(/كود التفعيل/g, '').replace(/[:：\s-]/g, '').trim();
-
-            const snap = await get(ref(db, 'clients'));
-            if (!snap.exists()) return alert("لم يتم تسجيل بياناتك بعد من الإدارة.");
-
-            let matchedId = null;
+            let foundId = null;
             snap.forEach(child => {
                 const c = child.val();
-                const dbCode = String(c.activationCode || '').replace(/[:：\s-]/g, '').trim();
-                if (c.phone === phone && dbCode.toUpperCase() === cleanCode.toUpperCase()) {
-                    matchedId = child.key;
+                if (c.phone === phone && (!c.password || c.isActivated === false)) {
+                    foundId = child.key;
                 }
             });
 
-            if (!matchedId) return alert("كود التفعيل أو رقم الهاتف غير صحيح!");
+            if (!foundId) return alert("رقم الهاتف غير مسجل في النظام أو تم تفعيله مسبقاً! قم بتسجيل الدخول مباشرة.");
 
-            verifiedTargetClientId = matchedId;
-            document.getElementById("act-step-1").style.display = "none";
-            document.getElementById("act-step-2").style.display = "block";
+            setupTargetClientId = foundId;
+            document.getElementById("setup-details-box").style.display = "block";
         };
 
         window.handleImageSelect = function(event) {
@@ -594,21 +484,21 @@
         };
 
         window.completeFirstSetup = async function() {
-            const pass1 = document.getElementById("act-pass1").value.trim();
-            const pass2 = document.getElementById("act-pass2").value.trim();
+            const pass1 = document.getElementById("setup-pass1").value.trim();
+            const pass2 = document.getElementById("setup-pass2").value.trim();
 
             if (!pass1 || pass1.length < 4) return alert("أدخل كلمة مرور لا تقل عن 4 أحرف أو أرقام");
             if (pass1 !== pass2) return alert("كلمتا المرور غير متطابقتين!");
             if (!selectedPhotoBase64) return alert("يرجى التقاط أو اختيار صورة شخصية للكارنيه");
 
-            await update(ref(db, 'clients/' + verifiedTargetClientId), {
+            await update(ref(db, 'clients/' + setupTargetClientId), {
                 password: pass1,
                 photo: selectedPhotoBase64,
                 isActivated: true
             });
 
-            currentClientId = verifiedTargetClientId;
-            localStorage.setItem("hpg_client_id", verifiedTargetClientId);
+            currentClientId = setupTargetClientId;
+            localStorage.setItem("hpg_client_id", setupTargetClientId);
             openClientMainApp();
         };
 
@@ -633,21 +523,75 @@
             openClientMainApp();
         };
 
+        function renderPackagesDropdownAndOffers() {
+            const sel = document.getElementById("reg-package");
+            const offersBox = document.getElementById("offers-list-container");
+            sel.innerHTML = "";
+            offersBox.innerHTML = "";
+
+            Object.entries(activePackages).forEach(([id, pkg]) => {
+                if (pkg.active !== false) {
+                    const typeDesc = pkg.type === 'sessions'
+                        ? `${pkg.sessions} سيشن`
+                        : `${pkg.durationDays} يوم`;
+
+                    const opt = document.createElement("option");
+                    opt.value = id;
+                    opt.textContent = `${pkg.name} - ${typeDesc} - ${pkg.price} ج.م`;
+                    sel.appendChild(opt);
+
+                    const offerDiv = document.createElement("div");
+                    offerDiv.className = "offer-item";
+                    offerDiv.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; font-weight:bold; color:var(--neon-green); font-size:1.05rem;">
+                            <span>${pkg.name}</span>
+                            <span>${pkg.price} ج.م</span>
+                        </div>
+                        <div class="offer-details">
+                            <p>المدة / السيشن: ${typeDesc}</p>
+                            <p>الدعوات: ${pkg.invitations || 0}</p>
+                        </div>
+                    `;
+                    offerDiv.onclick = () => {
+                        const det = offerDiv.querySelector('.offer-details');
+                        det.style.display = det.style.display === 'block' ? 'none' : 'block';
+                    };
+                    offersBox.appendChild(offerDiv);
+                }
+            });
+        }
+
+        window.sendRegistrationRequest = async function(method) {
+            const name = document.getElementById("reg-name").value.trim();
+            const phone = document.getElementById("reg-phone").value.trim();
+            const email = document.getElementById("reg-email").value.trim();
+            const address = document.getElementById("reg-address").value.trim();
+            const gender = document.getElementById("reg-gender").value;
+            const age = document.getElementById("reg-age").value.trim();
+            const pkgId = document.getElementById("reg-package").value;
+            const pkg = activePackages[pkgId] || { name: "باقة عامة", price: 0 };
+
+            if (!name || !phone || !age) return alert("يرجى ملء الاسم، رقم التليفون، والسن");
+
+            const structuredMsg = `طلب اشتراك جديد Hany Power GYM:\nالاسم: ${name}\nالهاتف: ${phone}\nالإيميل: ${email || 'غير محدد'}\nالعنوان: ${address || 'غير محدد'}\nالنوع: ${gender}\nالسن: ${age}\nالباقة: ${pkg.name}\nالسعر: ${pkg.price}`;
+
+            openDirectWhatsApp(gymSettings.whatsapp, structuredMsg);
+        };
+
         async function checkAutoRollover(clientId, c) {
             if (!c.queuedPackage) return;
             const today = new Date().toISOString().split('T')[0];
             const expiredByDate = c.endDate && today > c.endDate;
-            const expiredBySessions = c.remainingSessions !== null && c.remainingSessions !== undefined && c.remainingSessions <= 0;
 
-            if (expiredByDate || expiredBySessions) {
+            if (expiredByDate) {
                 const q = c.queuedPackage;
                 await update(ref(db, 'clients/' + clientId), {
                     packageId: q.packageId,
                     packageName: q.packageName,
                     startDate: q.startDate,
                     endDate: q.endDate,
-                    remainingSessions: q.remainingSessions ?? null,
-                    invitationsLeft: (c.invitationsLeft || 0) + (q.invitationsLeft || 0),
+                    remainingSessions: null,
+                    invitationsLeft: (c.invitationsLeft || 0),
                     queuedPackage: null
                 });
             }
