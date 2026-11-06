@@ -69,6 +69,12 @@
         .title-green { color: var(--neon-green); text-align: center; margin-bottom: 15px; font-size: 1.4rem; }
         .link-green { color: var(--neon-green); text-align: center; display: block; margin-top: 15px; cursor: pointer; font-weight: bold; text-decoration: underline; }
 
+        /* شريط فتح التطبيق الأوتوماتيكي إذا فُتح الرابط في متصفح خارجي */
+        #open-in-app-banner {
+            display: none; background: #092209; border: 2px solid var(--neon-green);
+            padding: 12px; border-radius: 12px; margin-bottom: 15px; text-align: center;
+        }
+
         .photo-picker-box {
             text-align: center; margin: 15px 0; padding: 15px; background: #0a0a0a;
             border: 1px dashed var(--neon-green); border-radius: 12px;
@@ -177,24 +183,27 @@
         </div>
     </div>
 
-    <!-- 2. شاشة تسجيل الدخول الموحدة والذكية -->
+    <!-- 2. شاشة تسجيل الدخول الذكية -->
     <div id="login-screen" class="screen">
+        <!-- بانر يظهر تلقائياً لو الرابط فتح في متصفح خارجي لتحويله للتطبيق المتسطب بضغطة واحدة -->
+        <div id="open-in-app-banner">
+            <p style="color:#fff; font-size:0.9rem; margin-bottom:8px;">هل قمت بتثبيت تطبيق الجيم على هاتفك؟</p>
+            <button class="btn-green" id="open-native-app-btn" style="padding:10px; font-size:0.95rem;">🚀 فتح في تطبيق Hany Power GYM مباشرة</button>
+        </div>
+
         <div class="card">
             <h2 class="title-green">تسجيل الدخول</h2>
             
-            <!-- خطوة إدخال رقم الهاتف أولاً -->
             <div id="step-phone-box">
                 <input type="tel" id="login-phone" placeholder="أدخل رقم الموبايل المسجل" oninput="resetLoginStep()">
                 <button class="btn-green" id="btn-check-phone" onclick="checkPhoneStatus()">متابعة</button>
             </div>
 
-            <!-- الحالة 1: العميل له باسورد سابق (يظهر حقل الباسورد فقط) -->
             <div id="existing-pass-box" style="display:none; margin-top:12px;">
                 <input type="password" id="login-pass" placeholder="أدخل كلمة المرور">
                 <button class="btn-green" onclick="loginWithPassword()">دخول</button>
             </div>
 
-            <!-- الحالة 2: العميل يدخل لأول مرة بعد تسجيله في الريسيبشن (يظهر إنشاء باسورد + صورة) -->
             <div id="first-time-setup-box" style="display:none; margin-top:12px; border-top:1px solid #262626; padding-top:15px;">
                 <p style="color:var(--neon-green); font-size:0.95rem; text-align:center; margin-bottom:12px; font-weight:bold;">
                     مرحباً بك يا كابتن <span id="first-time-client-name"></span>! هذا أول دخول لك، يرجى تعيين كلمة مرور جديدة والتقاط صورتك للكارنيه:
@@ -219,7 +228,7 @@
         </div>
     </div>
 
-    <!-- 3. شاشة إرسال طلب عميل جديد عبر الواتساب للإدارة -->
+    <!-- 3. شاشة إرسال طلب عميل جديد -->
     <div id="register-screen" class="screen">
         <div class="card">
             <h2 class="title-green">طلب اشتراك جديد</h2>
@@ -300,7 +309,6 @@
         <div class="footer-txt">جميع الحقوق محفوظة شركة <span>Link</span> للبرمجة والتطوير - <span>Muhamed Elhamalawy</span></div>
     </footer>
 
-    <!-- نافذة الشروط والأحكام -->
     <div class="modal-overlay" id="terms-modal">
         <div class="modal-box">
             <h3 class="title-green">الشروط والأحكام</h3>
@@ -309,7 +317,6 @@
         </div>
     </div>
 
-    <!-- نافذة الإشعارات -->
     <div class="modal-overlay" id="promo-modal">
         <div class="modal-box" style="text-align:center;">
             <h3 class="title-green">إشعار</h3>
@@ -343,6 +350,25 @@
         let matchedClientId = null;
         let matchedClientRecord = null;
         let selectedPhotoBase64 = "";
+
+        // التقاط رقم الموبايل القادم من رابط التفعيل الأوتوماتيكي (?phone=...)
+        const urlParams = new URLSearchParams(window.location.search);
+        const autoPhoneFromUrl = (urlParams.get('phone') || "").trim();
+
+        // التحقق مما إذا كان مفتوحاً في متصفح عادي وليس داخل تطبيق Capacitor
+        const isNativeApp = Boolean(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+
+        if (autoPhoneFromUrl && !isNativeApp) {
+            const deepLinkUri = `hanypowergym://open?phone=${encodeURIComponent(autoPhoneFromUrl)}`;
+            const banner = document.getElementById("open-in-app-banner");
+            const btn = document.getElementById("open-native-app-btn");
+            if (banner && btn) {
+                banner.style.display = "block";
+                btn.onclick = () => { window.location.href = deepLinkUri; };
+            }
+            // محاولة فتح التطبيق المتسطب أوتوماتيكياً فور فتح الرابط
+            setTimeout(() => { window.location.href = deepLinkUri; }, 350);
+        }
 
         function formatEgyptPhone(rawPhone) {
             let digits = String(rawPhone || "").replace(/\D/g, '');
@@ -379,18 +405,31 @@
         const welcomeArea = document.getElementById("welcome-area");
 
         const interval = setInterval(async () => {
-            progress += 2;
+            // تسريع التحميل إذا كان قادماً من رابط تفعيل مباشر
+            progress += autoPhoneFromUrl ? 10 : 2;
             if (progress > 100) progress = 100;
             bar.style.width = progress + "%";
             txt.textContent = progress + "%";
 
-            if (progress === 60) {
+            if (progress >= 60) {
                 document.getElementById("status-check").textContent = navigator.onLine ? "متصل" : "غير متصل بالإنترنت";
             }
 
             if (progress === 100) {
                 clearInterval(interval);
                 document.getElementById("app-topbar").style.display = "flex";
+
+                // الأولوية 1: إذا كان الرابط يحتوي على رقم موبايل (?phone=...) يكتبه ويفحصه أوتوماتيكياً فوراً
+                if (autoPhoneFromUrl) {
+                    document.getElementById("splash-screen").style.display = "none";
+                    resetLoginStep();
+                    document.getElementById("login-phone").value = autoPhoneFromUrl;
+                    showScreen('login-screen');
+                    await checkPhoneStatus();
+                    return;
+                }
+
+                // الأولوية 2: إذا كان مسجلاً من قبل على الجهاز
                 if (currentClientId) {
                     const snap = await get(ref(db, 'clients/' + currentClientId));
                     if (snap.exists()) {
@@ -404,7 +443,6 @@
                         return;
                     }
                 }
-                // زر واحد فقط لتسجيل الدخول
                 welcomeArea.innerHTML = `<button class="btn-green" onclick="startLoginFlow()">تسجيل دخول</button>`;
             }
         }, 100);
@@ -429,13 +467,12 @@
             document.getElementById("client-photo-preview").style.display = "none";
         };
 
-        // فحص رقم الموبايل تلقائياً وتحديد هل هو دخول لأول مرة أم لديه باسورد
         window.checkPhoneStatus = async function() {
             const phone = document.getElementById("login-phone").value.trim();
             if (!phone) return alert("يرجى إدخال رقم الموبايل أولاً");
 
             const snap = await get(ref(db, 'clients'));
-            if (!snap.exists()) return alert("رقم الموبايل غير مسجل بالنظام، يرجى التواصل مع الريسيبشن أو إرسال طلب اشتراك جديد.");
+            if (!snap.exists()) return alert("رقم الموبايل غير مسجل بالنظام، يرجى التواصل مع الريسيبشن.");
 
             let foundId = null;
             let foundData = null;
@@ -455,12 +492,10 @@
             matchedClientRecord = foundData;
             document.getElementById("btn-check-phone").style.display = "none";
 
-            // إذا كان يدخل لأول مرة (ليس لديه باسورد بعد)
             if (!foundData.password || foundData.isActivated === false) {
                 document.getElementById("first-time-client-name").textContent = foundData.name || "";
                 document.getElementById("first-time-setup-box").style.display = "block";
             } else {
-                // إذا كان مسجلاً من قبل ولديه باسورد
                 document.getElementById("existing-pass-box").style.display = "block";
                 document.getElementById("login-pass").focus();
             }
@@ -540,8 +575,11 @@
             sel.innerHTML = "";
             offersBox.innerHTML = "";
 
+            const todayStr = new Date().toISOString().split('T')[0];
+
             Object.entries(activePackages).forEach(([id, pkg]) => {
-                if (pkg.active !== false) {
+                const isExpired = pkg.expiryDate && todayStr > pkg.expiryDate;
+                if (pkg.active !== false && !isExpired) {
                     const typeDesc = pkg.type === 'sessions'
                         ? `${pkg.sessions} سيشن`
                         : `${pkg.durationDays} يوم`;
