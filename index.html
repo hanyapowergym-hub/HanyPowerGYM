@@ -36,6 +36,13 @@
         }
         .wa-header-btn svg { width: 20px; height: 20px; fill: #fff; }
 
+        /* شريط تنبيه العمل بدون إنترنت */
+        #offline-banner {
+            display: none; width: 100%; background: #3f2e05; border-bottom: 1px solid #f59e0b;
+            color: #fde047; text-align: center; padding: 8px 12px; font-size: 0.85rem; font-weight: bold;
+            z-index: 895;
+        }
+
         #splash-screen {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #000; z-index: 10000; display: flex; flex-direction: column;
@@ -69,7 +76,6 @@
         .title-green { color: var(--neon-green); text-align: center; margin-bottom: 15px; font-size: 1.4rem; }
         .link-green { color: var(--neon-green); text-align: center; display: block; margin-top: 15px; cursor: pointer; font-weight: bold; text-decoration: underline; }
 
-        /* شريط فتح التطبيق الأوتوماتيكي إذا فُتح الرابط في متصفح خارجي */
         #open-in-app-banner {
             display: none; background: #092209; border: 2px solid var(--neon-green);
             padding: 12px; border-radius: 12px; margin-bottom: 15px; text-align: center;
@@ -98,7 +104,7 @@
             padding: 25px 15px; display: flex; flex-direction: column; align-items: center;
             justify-content: center; margin-bottom: 15px; width: 100%; box-shadow: var(--neon-glow);
         }
-        #qrcode { background: #fff; padding: 14px; border-radius: 12px; display: flex; justify-content: center; align-items: center; }
+        #qrcode { background: #fff; padding: 14px; border-radius: 12px; display: flex; justify-content: center; align-items: center; min-height: 208px; min-width: 208px; }
 
         .two-cards-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; margin-bottom: 15px; }
         .stat-box {
@@ -156,6 +162,9 @@
         </button>
     </div>
 
+    <!-- بانر يظهر عند فتح التطبيق بدون إنترنت -->
+    <div id="offline-banner">📡 وضع عدم الاتصال بالإنترنت — يتم عرض آخر لقطة محفوظة لبياناتك</div>
+
     <div class="top-tabs-nav" id="client-top-tabs">
         <div class="top-tabs-container">
             <div class="nav-btn active" id="nav-btn-home" onclick="switchClientTab('home', this)">الرئيسية</div>
@@ -174,7 +183,7 @@
             <div class="progress-container">
                 <div class="progress-bar" id="progress-bar"></div>
             </div>
-            <div id="status-check" style="color:var(--silver); font-size:0.85rem;">جاري الاتصال...</div>
+            <div id="status-check" style="color:var(--silver); font-size:0.85rem;">جاري التحميل...</div>
             <div id="welcome-area"></div>
         </div>
         <div class="link-global-footer">
@@ -185,7 +194,6 @@
 
     <!-- 2. شاشة تسجيل الدخول الذكية -->
     <div id="login-screen" class="screen">
-        <!-- بانر يظهر تلقائياً لو الرابط فتح في متصفح خارجي لتحويله للتطبيق المتسطب بضغطة واحدة -->
         <div id="open-in-app-banner">
             <p style="color:#fff; font-size:0.9rem; margin-bottom:8px;">هل قمت بتثبيت تطبيق الجيم على هاتفك؟</p>
             <button class="btn-green" id="open-native-app-btn" style="padding:10px; font-size:0.95rem;">🚀 فتح في تطبيق Hany Power GYM مباشرة</button>
@@ -325,6 +333,15 @@
         </div>
     </div>
 
+    <script>
+        // تسجيل الـ Service Worker لفتح الصفحة بدون إنترنت
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(() => {});
+            });
+        }
+    </script>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, get, push, update, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -340,25 +357,83 @@
             measurementId: "G-GG1GLQLD6E"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+        let db = null;
+        try {
+            const app = initializeApp(firebaseConfig);
+            db = getDatabase(app);
+        } catch (err) {
+            console.warn("Offline mode initialization");
+        }
 
-        let gymSettings = { whatsapp: "201000000000", email: "info@hanypowergym.com", workDays: "يومياً من 10 ص إلى 12 م", terms: "" };
-        let activePackages = {};
+        let gymSettings = JSON.parse(localStorage.getItem("hpg_cached_settings") || '{"whatsapp":"201000000000","email":"info@hanypowergym.com","workDays":"يومياً من 10 ص إلى 12 م","terms":""}');
+        let activePackages = JSON.parse(localStorage.getItem("hpg_cached_packages") || "{}");
         let currentClientId = localStorage.getItem("hpg_client_id");
-        let currentClientData = null;
+        let currentClientData = JSON.parse(localStorage.getItem("hpg_cached_client_data") || "null");
         let matchedClientId = null;
         let matchedClientRecord = null;
         let selectedPhotoBase64 = "";
 
-        // التقاط رقم الموبايل القادم من رابط التفعيل الأوتوماتيكي (?phone=...)
+        // مراقبة حالة الإنترنت لإظهار أو إخفاء شريط عدم الاتصال
+        function updateOnlineStatusBanner() {
+            const banner = document.getElementById("offline-banner");
+            if (!navigator.onLine) {
+                banner.style.display = "block";
+            } else {
+                banner.style.display = "none";
+            }
+        }
+        window.addEventListener('online', updateOnlineStatusBanner);
+        window.addEventListener('offline', updateOnlineStatusBanner);
+        updateOnlineStatusBanner();
+
+        // حفظ لقطة بيانات العميل في ذاكرة الموبايل
+        function saveClientSnapshotToCache(data) {
+            if (!data) return;
+            currentClientData = data;
+            try {
+                localStorage.setItem("hpg_cached_client_data", JSON.stringify(data));
+            } catch (e) {}
+        }
+
+        // عرض بيانات العميل على الشاشة (سواء من الإنترنت أو من آخر لقطة محفوظة)
+        function renderClientUIFromData(c) {
+            if (!c) return;
+            const avatar = document.getElementById("ui-client-photo");
+            if (c.photo) {
+                avatar.src = c.photo;
+                avatar.style.display = "block";
+            } else {
+                avatar.style.display = "none";
+            }
+
+            document.getElementById("ui-client-name").textContent = c.name || "مشترك";
+            document.getElementById("ui-client-pkg").textContent = c.packageName || "باقة عامة";
+            document.getElementById("ui-client-dates").textContent = `بداية: ${c.startDate || '--'} | نهاية: ${c.endDate || 'مفتوح'}`;
+            document.getElementById("ui-att-count").textContent = c.attendanceCount || 0;
+            document.getElementById("ui-inv-count").textContent = c.invitationsLeft || 0;
+
+            const nextBadge = document.getElementById("ui-next-pkg");
+            if (c.queuedPackage) {
+                nextBadge.style.display = "block";
+                nextBadge.textContent = `الباقة القادمة: ${c.queuedPackage.packageName} (تبدأ ${c.queuedPackage.startDate})`;
+            } else {
+                nextBadge.style.display = "none";
+            }
+
+            const debtEl = document.getElementById("ui-client-debt");
+            if (c.debt && c.debt > 0) {
+                debtEl.style.display = "block";
+                debtEl.textContent = `متبقي مديونية: ${c.debt} ج.م`;
+            } else {
+                debtEl.style.display = "none";
+            }
+        }
+
         const urlParams = new URLSearchParams(window.location.search);
         const autoPhoneFromUrl = (urlParams.get('phone') || "").trim();
-
-        // التحقق مما إذا كان مفتوحاً في متصفح عادي وليس داخل تطبيق Capacitor
         const isNativeApp = Boolean(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
 
-        if (autoPhoneFromUrl && !isNativeApp) {
+        if (autoPhoneFromUrl && !isNativeApp && navigator.onLine) {
             const deepLinkUri = `hanypowergym://open?phone=${encodeURIComponent(autoPhoneFromUrl)}`;
             const banner = document.getElementById("open-in-app-banner");
             const btn = document.getElementById("open-native-app-btn");
@@ -366,7 +441,6 @@
                 banner.style.display = "block";
                 btn.onclick = () => { window.location.href = deepLinkUri; };
             }
-            // محاولة فتح التطبيق المتسطب أوتوماتيكياً فور فتح الرابط
             setTimeout(() => { window.location.href = deepLinkUri; }, 350);
         }
 
@@ -390,14 +464,29 @@
             openDirectWhatsApp(gymSettings.whatsapp, msg);
         };
 
-        onValue(ref(db, 'gym_settings'), (snap) => {
-            if (snap.exists()) gymSettings = { ...gymSettings, ...snap.val() };
-        });
+        if (db) {
+            onValue(ref(db, 'gym_settings'), (snap) => {
+                if (snap.exists()) {
+                    gymSettings = { ...gymSettings, ...snap.val() };
+                    localStorage.setItem("hpg_cached_settings", JSON.stringify(gymSettings));
+                }
+            });
 
-        onValue(ref(db, 'packages'), (snap) => {
-            activePackages = snap.val() || {};
-            renderPackagesDropdownAndOffers();
-        });
+            onValue(ref(db, 'packages'), (snap) => {
+                activePackages = snap.val() || {};
+                localStorage.setItem("hpg_cached_packages", JSON.stringify(activePackages));
+                renderPackagesDropdownAndOffers();
+            });
+        }
+        renderPackagesDropdownAndOffers();
+
+        // دالة مساعدة لجلب البيانات من Firebase بوقت محدد (Timeout) حتى لا يعلق التطبيق لو الإنترنت ضعيف أو مقطوع
+        function getWithTimeout(dbRef, timeoutMs = 2200) {
+            return Promise.race([
+                get(dbRef),
+                new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), timeoutMs))
+            ]);
+        }
 
         let progress = 0;
         const bar = document.getElementById("progress-bar");
@@ -405,22 +494,21 @@
         const welcomeArea = document.getElementById("welcome-area");
 
         const interval = setInterval(async () => {
-            // تسريع التحميل إذا كان قادماً من رابط تفعيل مباشر
-            progress += autoPhoneFromUrl ? 10 : 2;
+            progress += (autoPhoneFromUrl || !navigator.onLine) ? 10 : 4;
             if (progress > 100) progress = 100;
             bar.style.width = progress + "%";
             txt.textContent = progress + "%";
 
-            if (progress >= 60) {
-                document.getElementById("status-check").textContent = navigator.onLine ? "متصل" : "غير متصل بالإنترنت";
+            if (progress >= 50) {
+                document.getElementById("status-check").textContent = navigator.onLine ? "متصل بالإنترنت" : "وضع عدم الاتصال (فتح آخر لقطة محفوظة)";
             }
 
             if (progress === 100) {
                 clearInterval(interval);
                 document.getElementById("app-topbar").style.display = "flex";
 
-                // الأولوية 1: إذا كان الرابط يحتوي على رقم موبايل (?phone=...) يكتبه ويفحصه أوتوماتيكياً فوراً
-                if (autoPhoneFromUrl) {
+                // 1. إذا كان قادماً من رابط تفعيل ويوجد إنترنت
+                if (autoPhoneFromUrl && navigator.onLine) {
                     document.getElementById("splash-screen").style.display = "none";
                     resetLoginStep();
                     document.getElementById("login-phone").value = autoPhoneFromUrl;
@@ -429,23 +517,33 @@
                     return;
                 }
 
-                // الأولوية 2: إذا كان مسجلاً من قبل على الجهاز
+                // 2. إذا كان العميل مسجلاً دخوله مسبقاً على الموبايل (يفتح حتى لو مفيش نت نهائياً!)
                 if (currentClientId) {
-                    const snap = await get(ref(db, 'clients/' + currentClientId));
-                    if (snap.exists()) {
-                        currentClientData = snap.val();
+                    if (navigator.onLine && db) {
+                        try {
+                            const snap = await getWithTimeout(ref(db, 'clients/' + currentClientId), 2200);
+                            if (snap && snap.exists()) {
+                                saveClientSnapshotToCache(snap.val());
+                            }
+                        } catch (e) {
+                            // في حالة انقطاع الإنترنت أو بطء الشبكة نكمل بآخر لقطة محفوظة فوراً
+                        }
+                    }
+
+                    if (currentClientData) {
                         const firstName = (currentClientData.name || "").trim().split(" ")[0];
                         welcomeArea.innerHTML = `<div class="welcome-msg">مرحبا يا كابتن <span>${firstName}</span></div>`;
                         setTimeout(() => {
                             document.getElementById("splash-screen").style.display = "none";
                             openClientMainApp();
-                        }, 1000);
+                        }, 600);
                         return;
                     }
                 }
+
                 welcomeArea.innerHTML = `<button class="btn-green" onclick="startLoginFlow()">تسجيل دخول</button>`;
             }
-        }, 100);
+        }, 80);
 
         window.startLoginFlow = function() {
             document.getElementById("splash-screen").style.display = "none";
@@ -468,6 +566,7 @@
         };
 
         window.checkPhoneStatus = async function() {
+            if (!navigator.onLine) return alert("يرجى الاتصال بالإنترنت عند تسجيل الدخول لأول مرة فقط، وبعدها سيعمل التطبيق بدون إنترنت.");
             const phone = document.getElementById("login-phone").value.trim();
             if (!phone) return alert("يرجى إدخال رقم الموبايل أولاً");
 
@@ -509,6 +608,7 @@
             }
             currentClientId = matchedClientId;
             localStorage.setItem("hpg_client_id", matchedClientId);
+            saveClientSnapshotToCache(matchedClientRecord);
             openClientMainApp();
         };
 
@@ -546,6 +646,13 @@
             if (pass1 !== pass2) return alert("كلمتا المرور غير متطابقتين!");
             if (!selectedPhotoBase64) return alert("يرجى التقاط أو اختيار صورة شخصية للكارنيه");
 
+            const updatedRecord = {
+                ...matchedClientRecord,
+                password: pass1,
+                photo: selectedPhotoBase64,
+                isActivated: true
+            };
+
             await update(ref(db, 'clients/' + matchedClientId), {
                 password: pass1,
                 photo: selectedPhotoBase64,
@@ -554,6 +661,7 @@
 
             currentClientId = matchedClientId;
             localStorage.setItem("hpg_client_id", matchedClientId);
+            saveClientSnapshotToCache(updatedRecord);
             openClientMainApp();
         };
 
@@ -572,6 +680,7 @@
         function renderPackagesDropdownAndOffers() {
             const sel = document.getElementById("reg-package");
             const offersBox = document.getElementById("offers-list-container");
+            if (!sel || !offersBox) return;
             sel.innerHTML = "";
             offersBox.innerHTML = "";
 
@@ -628,7 +737,7 @@
         };
 
         async function checkAutoRollover(clientId, c) {
-            if (!c.queuedPackage) return;
+            if (!c.queuedPackage || !navigator.onLine || !db) return;
             const today = new Date().toISOString().split('T')[0];
             const expiredByDate = c.endDate && today > c.endDate;
 
@@ -646,101 +755,95 @@
             }
         }
 
+        // رسم كود الـ QR حتى لو لم تحمل مكتبة الـ QR الخارجية بسبب انقطاع الإنترنت
+        function renderQRCodeSafe(container, textCode) {
+            container.innerHTML = "";
+            if (typeof QRCode !== "undefined") {
+                new QRCode(container, { text: textCode, width: 180, height: 180 });
+            } else {
+                container.innerHTML = `<div style="color:#000; font-weight:900; padding:20px; text-align:center;">كود الدخول:<br><span style="font-size:1.3rem;">${textCode}</span></div>`;
+            }
+        }
+
         function openClientMainApp() {
             showScreen('main-screen');
             document.getElementById("client-top-tabs").style.display = "block";
             document.getElementById("app-topbar").style.display = "flex";
 
+            // 1. عرض آخر لقطة محفوظة فوراً بدون انتظار الإنترنت
             const qrContainer = document.getElementById("qrcode");
-            qrContainer.innerHTML = "";
-            new QRCode(qrContainer, { text: currentClientId, width: 180, height: 180 });
+            renderQRCodeSafe(qrContainer, currentClientId);
 
-            onValue(ref(db, 'clients/' + currentClientId), async (snap) => {
-                if (!snap.exists()) {
-                    logoutClient();
-                    return;
-                }
-                const c = snap.val();
-                await checkAutoRollover(currentClientId, c);
-                currentClientData = c;
+            if (currentClientData) {
+                renderClientUIFromData(currentClientData);
+            }
 
-                const avatar = document.getElementById("ui-client-photo");
-                if (c.photo) {
-                    avatar.src = c.photo;
-                    avatar.style.display = "block";
-                } else {
-                    avatar.style.display = "none";
-                }
+            // 2. إذا توفر اتصال بالإنترنت، يتم التحديث الحي وحفظ اللقطة الجديدة تلقائياً
+            if (db) {
+                onValue(ref(db, 'clients/' + currentClientId), async (snap) => {
+                    if (!snap.exists()) {
+                        logoutClient();
+                        return;
+                    }
+                    const c = snap.val();
+                    await checkAutoRollover(currentClientId, c);
+                    saveClientSnapshotToCache(c);
+                    renderClientUIFromData(c);
 
-                document.getElementById("ui-client-name").textContent = c.name;
-                document.getElementById("ui-client-pkg").textContent = c.packageName || "باقة عامة";
-                document.getElementById("ui-client-dates").textContent = `بداية: ${c.startDate || '--'} | نهاية: ${c.endDate || 'مفتوح'}`;
-                document.getElementById("ui-att-count").textContent = c.attendanceCount || 0;
-                document.getElementById("ui-inv-count").textContent = c.invitationsLeft || 0;
-
-                const nextBadge = document.getElementById("ui-next-pkg");
-                if (c.queuedPackage) {
-                    nextBadge.style.display = "block";
-                    nextBadge.textContent = `الباقة القادمة: ${c.queuedPackage.packageName} (تبدأ ${c.queuedPackage.startDate})`;
-                } else {
-                    nextBadge.style.display = "none";
-                }
-
-                const debtEl = document.getElementById("ui-client-debt");
-                if (c.debt && c.debt > 0) {
-                    debtEl.style.display = "block";
-                    debtEl.textContent = `متبقي مديونية: ${c.debt} ج.م`;
-                } else {
-                    debtEl.style.display = "none";
-                }
-
-                if (!c.termsAccepted) {
-                    document.getElementById("terms-content").textContent = gymSettings.terms || "1. الالتزام بالزي الرياضي الكامل.\n2. الحفاظ على نظافة وترتيب الأوزان.\n3. الاشتراك شخصي.\n4. الإدارة غير مسؤولة عن المفقودات.";
-                    document.getElementById("terms-modal").style.display = "flex";
-                }
-            });
-
-            onValue(ref(db, 'promos'), (snap) => {
-                if (!snap.exists() || !currentClientId) return;
-                const promos = snap.val();
-                const keys = Object.keys(promos);
-                const latestKey = keys[keys.length - 1];
-                const latestPromo = promos[latestKey];
-                const seenKey = `promo_seen_${currentClientId}_${latestKey}`;
-
-                if (latestPromo && !localStorage.getItem(seenKey)) {
-                    document.getElementById("promo-content").textContent = latestPromo.text;
-                    document.getElementById("promo-modal").style.display = "flex";
-                    localStorage.setItem(seenKey, "true");
-                }
-            });
-
-            onValue(ref(db, 'complaints'), (snap) => {
-                const box = document.getElementById("client-complaints-history");
-                box.innerHTML = "";
-                if (!snap.exists()) return;
-                snap.forEach(ch => {
-                    const comp = ch.val();
-                    if (comp.clientId === currentClientId) {
-                        const div = document.createElement("div");
-                        div.style.cssText = "background:#0a0a0a; padding:12px; border-radius:8px; margin-bottom:8px; border:1px solid #222;";
-                        div.innerHTML = `
-                            <div style="color:#fff;">${comp.text}</div>
-                            <div style="color:var(--neon-green); font-size:0.9rem; margin-top:6px;">
-                                ${comp.reply ? `رد (${comp.repliedBy || 'الإدارة'}): ${comp.reply}` : 'قيد المراجعة...'}
-                            </div>
-                        `;
-                        box.prepend(div);
+                    if (!c.termsAccepted) {
+                        document.getElementById("terms-content").textContent = gymSettings.terms || "1. الالتزام بالزي الرياضي الكامل.\n2. الحفاظ على نظافة وترتيب الأوزان.\n3. الاشتراك شخصي.\n4. الإدارة غير مسؤولة عن المفقودات.";
+                        document.getElementById("terms-modal").style.display = "flex";
                     }
                 });
-            });
+
+                onValue(ref(db, 'promos'), (snap) => {
+                    if (!snap.exists() || !currentClientId) return;
+                    const promos = snap.val();
+                    const keys = Object.keys(promos);
+                    const latestKey = keys[keys.length - 1];
+                    const latestPromo = promos[latestKey];
+                    const seenKey = `promo_seen_${currentClientId}_${latestKey}`;
+
+                    if (latestPromo && !localStorage.getItem(seenKey)) {
+                        document.getElementById("promo-content").textContent = latestPromo.text;
+                        document.getElementById("promo-modal").style.display = "flex";
+                        localStorage.setItem(seenKey, "true");
+                    }
+                });
+
+                onValue(ref(db, 'complaints'), (snap) => {
+                    const box = document.getElementById("client-complaints-history");
+                    box.innerHTML = "";
+                    if (!snap.exists()) return;
+                    snap.forEach(ch => {
+                        const comp = ch.val();
+                        if (comp.clientId === currentClientId) {
+                            const div = document.createElement("div");
+                            div.style.cssText = "background:#0a0a0a; padding:12px; border-radius:8px; margin-bottom:8px; border:1px solid #222;";
+                            div.innerHTML = `
+                                <div style="color:#fff;">${comp.text}</div>
+                                <div style="color:var(--neon-green); font-size:0.9rem; margin-top:6px;">
+                                    ${comp.reply ? `رد (${comp.repliedBy || 'الإدارة'}): ${comp.reply}` : 'قيد المراجعة...'}
+                                </div>
+                            `;
+                            box.prepend(div);
+                        }
+                    });
+                });
+            }
         }
 
         window.acceptTerms = function() {
-            update(ref(db, 'clients/' + currentClientId), {
-                termsAccepted: true,
-                termsAcceptedAt: new Date().toISOString()
-            });
+            if (currentClientData) {
+                currentClientData.termsAccepted = true;
+                saveClientSnapshotToCache(currentClientData);
+            }
+            if (navigator.onLine && db) {
+                update(ref(db, 'clients/' + currentClientId), {
+                    termsAccepted: true,
+                    termsAcceptedAt: new Date().toISOString()
+                });
+            }
             document.getElementById("terms-modal").style.display = "none";
         };
 
@@ -759,6 +862,7 @@
         };
 
         window.sendComplaint = function() {
+            if (!navigator.onLine) return alert("يرجى الاتصال بالإنترنت لإرسال الرسالة.");
             const txt = document.getElementById("complaint-text").value.trim();
             if (!txt) return alert("اكتب الرسالة أولاً");
             push(ref(db, 'complaints'), {
@@ -776,6 +880,7 @@
 
         window.logoutClient = function() {
             localStorage.removeItem("hpg_client_id");
+            localStorage.removeItem("hpg_cached_client_data");
             currentClientId = null;
             currentClientData = null;
             document.getElementById("client-top-tabs").style.display = "none";
